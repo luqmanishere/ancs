@@ -204,18 +204,6 @@ impl TryFrom<u8> for AttributeID {
     }
 }
 
-struct Attribute(AttributeID, u16, String);
-
-impl Attribute {
-    fn parse(i: &[u8]) -> IResult<&[u8], Attribute> {
-        let (i, id) = be_u8(i)?;
-        let (i, length) = be_u16(i)?;
-        let (i, attribute) = count(be_u8, length.into())(i)?;
-
-        Ok((i, Attribute(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
-    }
-}
-
 impl AttributeID {
     pub fn parse(i:&[u8]) -> IResult<&[u8], AttributeID> {
         let (i, attribute_id) = be_u8(i)?;
@@ -224,7 +212,33 @@ impl AttributeID {
     }
 }
 
+struct AttributeList(AttributeID, u16, String);
 
+impl From<AttributeList> for Vec<u8> {
+    fn from(original: AttributeList) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::new();
+
+        let id: u8 = original.0.into();
+        let mut length: [u8; 2] = original.1.to_le_bytes();
+        let mut attribute: Vec<u8> = original.2.into_bytes();
+
+        vec.push(id);
+        vec.append(&mut length.to_vec());
+        vec.append(&mut attribute);
+
+        return vec;
+    }
+}
+
+impl AttributeList {
+    fn parse(i: &[u8]) -> IResult<&[u8], AttributeList> {
+        let (i, id) = AttributeID::parse(i)?;
+        let (i, length) = be_u16(i)?;
+        let (i, attribute) = count(be_u8, length.into())(i)?;
+
+        Ok((i, AttributeList(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
+    }
+}
 
 struct NotificationSourceCharacteristic {
     event_id: EventID,
@@ -290,14 +304,35 @@ impl Into<Vec<u8>> for GetNotificationAttributesRequest {
 struct GetNotificationAttributesResponse {
     command_id: CommandID,
     notification_uuid: Vec<u8>,
-    attribute_list: Vec<Attribute>,
+    attribute_list: Vec<AttributeList>,
+}
+
+impl From<GetNotificationAttributesResponse> for Vec<u8> {
+    fn from(original: GetNotificationAttributesResponse) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::new();
+
+        // Convert all attributes to bytes
+        let command_id: u8 = original.command_id.into();
+        let mut app_identifier: Vec<u8> = original.notification_uuid;
+        let mut attribute_ids: Vec<u8> = original.attribute_list
+            .into_iter()
+            .map(|attribute| attribute.into())
+            .into_iter()
+            .flat_map(|att: Vec<u8>| att).collect();
+
+        vec.push(command_id);
+        vec.append(&mut app_identifier);
+        vec.append(&mut attribute_ids);
+
+        return vec;
+    }
 }
 
 impl GetNotificationAttributesResponse {
     pub fn parse(i:&[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, notification_uuid) = count(be_u8, 4)(i)?;
-        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+        let (i, attribute_list) = many0(AttributeList::parse)(i)?;
 
         Ok((i, GetNotificationAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), notification_uuid: notification_uuid, attribute_list: attribute_list } ))
     }
@@ -309,17 +344,34 @@ struct GetAppAttributesRequest {
     attribute_ids: Vec<AttributeID>,
 }
 
+impl From<GetAppAttributesRequest> for Vec<u8> {
+    fn from(original: GetAppAttributesRequest) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::new();
+
+        // Convert all attributes to bytes
+        let command_id: u8 = original.command_id.into();
+        let mut app_identifier: Vec<u8> = original.app_identifier.into_bytes();
+        let mut attribute_ids: Vec<u8> = original.attribute_ids.into_iter().map(|id| id.into()).collect();
+
+        vec.push(command_id);
+        vec.append(&mut app_identifier);
+        vec.append(&mut attribute_ids);
+
+        return vec;
+    }
+}
+
 struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
-    attribute_list: Vec<Attribute>,
+    attribute_list: Vec<AttributeList>,
 }
 
 impl GetAppAttributesResponse {
     pub fn parse(i:&[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, app_identifier) = take_until(" ")(i)?;
-        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+        let (i, attribute_list) = many0(AttributeList::parse)(i)?;
 
         Ok((i, GetAppAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(), attribute_list: attribute_list } ))
     }
