@@ -1,120 +1,205 @@
-use byteorder::{LittleEndian};
-use nom::error::{FromExternalError, ParseError};
-use nom::multi::many0;
-use std::str;
 use std::convert::{
     Into,
     TryFrom,
 };
+
 use nom::{
     number::complete::{be_u8, be_u16},
+    multi::{many0},
     bytes::complete::{take_until},
-    multi::{count, fold_many0},
+    multi::{count},
     IResult,
-    Err,
-    Parser,
-    error::VerboseError
 };
 
-#[repr(u8)]
 enum EventID {
-    notification_added = 0,
-    notification_modified = 1,
-    notification_removed = 2,
+    NotificationAdded = 0,
+    NotificationModified = 1,
+    NotificationRemoved = 2,
+}
+
+impl From<EventID> for u8 {
+    fn from(original: EventID) -> u8 {
+        match original {
+            EventID::NotificationAdded    => 0,
+            EventID::NotificationModified => 1,
+            EventID::NotificationRemoved  => 2,
+        }
+    }
 }
 
 impl TryFrom<u8> for EventID {
     type Error = ();
 
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            x if x == EventID::notification_added as u8 => Ok(EventID::notification_added),
-            x if x == EventID::notification_modified as u8 => Ok(EventID::notification_modified),
-            x if x == EventID::notification_removed as u8 => Ok(EventID::notification_removed),
-            _ => Err(()),
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0 => Ok(EventID::NotificationAdded),
+            1 => Ok(EventID::NotificationModified),
+            2 => Ok(EventID::NotificationRemoved),
+            _ => Err(())
         }
     }
 }
 
-#[repr(u8)]
 enum EventFlag {
-    silent = 0b00000001,
-    important = 0b00000010,
-    pre_existing = 0b00000100,
-    positive_action = 0b00001000,
-    negative_action = 0b00010000,
+    Silent         = 0b00000001,
+    Important      = 0b00000010,
+    PreExisting    = 0b00000100,
+    PositiveAction = 0b00001000,
+    NegativeAction = 0b00010000,
+}
+
+impl From<EventFlag> for u8 {
+    fn from(original: EventFlag) -> u8 {
+        match original {
+            EventFlag::Silent         => 0b00000001,
+            EventFlag::Important      => 0b00000010,
+            EventFlag::PreExisting    => 0b00000100,
+            EventFlag::PositiveAction => 0b00001000,
+            EventFlag::NegativeAction => 0b00010000
+        }
+    }
 }
 
 impl TryFrom<u8> for EventFlag {
     type Error = ();
 
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            x if x == EventFlag::silent as u8 => Ok(EventFlag::silent),
-            x if x == EventFlag::important as u8 => Ok(EventFlag::important),
-            x if x == EventFlag::pre_existing as u8 => Ok(EventFlag::pre_existing),
-            x if x == EventFlag::positive_action as u8 => Ok(EventFlag::positive_action),
-            x if x == EventFlag::negative_action as u8 => Ok(EventFlag::negative_action),
-            _ => Err(()),
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0b00000001 => Ok(EventFlag::Silent),
+            0b00000010 => Ok(EventFlag::Important),
+            0b00000100 => Ok(EventFlag::PreExisting),
+            0b00001000 => Ok(EventFlag::PositiveAction),
+            0b00010000 => Ok(EventFlag::NegativeAction),
+            _ => Err(())
         }
     }
 }
 
-#[repr(u8)]
 enum CategoryID {
-    other = 0,
-    incoming_call = 1,
-    missed_call = 2,
-    voicemail = 3,
-    social = 4,
-    schedule = 5,
-    email = 6,
-    news = 7,
-    health_and_fitness = 8,
-    business_and_finance = 9,
-    location = 10,
-    entertainment = 11,
+    Other              = 0,
+    IncomingCall       = 1,
+    MissedCall         = 2,
+    Voicemail          = 3,
+    Social             = 4,
+    Schedule           = 5,
+    Email              = 6,
+    News               = 7,
+    HealthAndFitness   = 8,
+    BusinessAndFinance = 9,
+    Location           = 10,
+    Entertainment      = 11,
+}
+
+impl From<CategoryID> for u8 {
+    fn from(original: CategoryID) -> u8 {
+        match original {
+            CategoryID::Other              => 0,
+            CategoryID::IncomingCall       => 1,
+            CategoryID::MissedCall         => 2,
+            CategoryID::Voicemail          => 3,
+            CategoryID::Social             => 4,
+            CategoryID::Schedule           => 5,
+            CategoryID::Email              => 6,
+            CategoryID::News               => 7,
+            CategoryID::HealthAndFitness   => 8,
+            CategoryID::BusinessAndFinance => 9,
+            CategoryID::Location           => 10,
+            CategoryID::Entertainment      => 11,
+        }
+    }
 }
 
 impl TryFrom<u8> for CategoryID {
     type Error = ();
 
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            x if x == CategoryID::other as u8 => Ok(CategoryID::other),
-            x if x == CategoryID::incoming_call as u8 => Ok(CategoryID::incoming_call),
-            x if x == CategoryID::missed_call as u8 => Ok(CategoryID::missed_call),
-            x if x == CategoryID::voicemail as u8 => Ok(CategoryID::voicemail),
-            x if x == CategoryID::social as u8 => Ok(CategoryID::social),
-            x if x == CategoryID::schedule as u8 => Ok(CategoryID::schedule),
-            x if x == CategoryID::email as u8 => Ok(CategoryID::email),
-            x if x == CategoryID::news as u8 => Ok(CategoryID::news),
-            x if x == CategoryID::health_and_fitness as u8 => Ok(CategoryID::health_and_fitness),
-            x if x == CategoryID::business_and_finance as u8 => Ok(CategoryID::business_and_finance),
-            x if x == CategoryID::location as u8 => Ok(CategoryID::location),
-            x if x == CategoryID::entertainment as u8 => Ok(CategoryID::entertainment),
-
-            _ => Err(()),
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0  => Ok(CategoryID::Other),
+            1  => Ok(CategoryID::IncomingCall),
+            2  => Ok(CategoryID::MissedCall),
+            3  => Ok(CategoryID::Voicemail),
+            4  => Ok(CategoryID::Social),
+            5  => Ok(CategoryID::Schedule),
+            6  => Ok(CategoryID::Email),
+            7  => Ok(CategoryID::News),
+            8  => Ok(CategoryID::HealthAndFitness),
+            9  => Ok(CategoryID::BusinessAndFinance),
+            10 => Ok(CategoryID::Location),
+            11 => Ok(CategoryID::Entertainment),
+            _  => Err(())
         }
     }
 }
 
-#[repr(u8)]
 enum CommandID {
-    get_notification_attributes = 0,
-    get_app_attributes = 1,
-    perform_notification_action = 2,
+    GetNotificationAttributes = 0,
+    GetAppAttributes          = 1,
+    PerformNotificationAction = 2,
+}
+
+impl From<CommandID> for u8 {
+    fn from(original: CommandID) -> u8 {
+        match original {
+            CommandID::GetNotificationAttributes => 0,
+            CommandID::GetAppAttributes          => 1,
+            CommandID::PerformNotificationAction => 2,
+        }
+    }
 }
 
 impl TryFrom<u8> for CommandID {
     type Error = ();
 
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            x if x == CommandID::get_notification_attributes as u8 => Ok(CommandID::get_notification_attributes),
-            x if x == CommandID::get_app_attributes as u8 => Ok(CommandID::get_app_attributes),
-            x if x == CommandID::perform_notification_action as u8 => Ok(CommandID::perform_notification_action),
-            _ => Err(()),
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0 => Ok(CommandID::GetNotificationAttributes),
+            1 => Ok(CommandID::GetAppAttributes),
+            2 => Ok(CommandID::PerformNotificationAction),
+            _ => Err(())
+        }
+    }
+}
+
+enum AttributeID {
+    AppIdentifier       = 0,
+    Title               = 1,
+    Subtitle            = 2,
+    Message             = 3,
+    MessageSize         = 4,
+    Date                = 5,
+    PositiveActionLabel = 6,
+    NegativeActionLabel = 7,
+}
+
+impl From<AttributeID> for u8 {
+    fn from(original: AttributeID) -> u8 {
+        match original {
+            AttributeID::AppIdentifier       => 0,
+            AttributeID::Title               => 1,
+            AttributeID::Subtitle            => 2,
+            AttributeID::Message             => 3,
+            AttributeID::MessageSize         => 4,
+            AttributeID::Date                => 5,
+            AttributeID::PositiveActionLabel => 6,
+            AttributeID::NegativeActionLabel => 7,
+        }
+    }
+}
+
+impl TryFrom<u8> for AttributeID {
+    type Error = ();
+
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0 => Ok(AttributeID::AppIdentifier),
+            1 => Ok(AttributeID::Title),
+            2 => Ok(AttributeID::Subtitle),
+            3 => Ok(AttributeID::Message),
+            4 => Ok(AttributeID::MessageSize),
+            5 => Ok(AttributeID::Date),
+            6 => Ok(AttributeID::PositiveActionLabel),
+            7 => Ok(AttributeID::NegativeActionLabel),
+            _ => Err(())
         }
     }
 }
@@ -128,36 +213,6 @@ impl Attribute {
         let (i, attribute) = count(be_u8, length.into())(i)?;
 
         Ok((i, Attribute(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
-    }
-}
-
-#[repr(u8)]
-enum AttributeID {
-    app_identifier = 0,
-    title = 1,
-    subtitle = 2,
-    message = 3,
-    message_size = 4,
-    date = 5,
-    positive_action_label = 6,
-    negative_action_label = 7,
-}
-
-impl TryFrom<u8> for AttributeID {
-    type Error = ();
-
-    fn try_from(v: u8) -> Result<Self, Self::Error> {
-        match v {
-            x if x == AttributeID::app_identifier as u8 => Ok(AttributeID::app_identifier),
-            x if x == AttributeID::title as u8 => Ok(AttributeID::title),
-            x if x == AttributeID::subtitle as u8 => Ok(AttributeID::subtitle),
-            x if x == AttributeID::message as u8 => Ok(AttributeID::message),
-            x if x == AttributeID::message_size as u8 => Ok(AttributeID::message_size),
-            x if x == AttributeID::date as u8 => Ok(AttributeID::date),
-            x if x == AttributeID::positive_action_label as u8 => Ok(AttributeID::positive_action_label),
-            x if x == AttributeID::negative_action_label as u8 => Ok(AttributeID::negative_action_label),
-            _ => Err(()),
-        }
     }
 }
 
