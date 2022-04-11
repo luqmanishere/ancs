@@ -1,4 +1,6 @@
 use byteorder::{LittleEndian};
+use nom::error::{FromExternalError, ParseError};
+use nom::multi::many0;
 use std::str;
 use std::convert::{
     Into,
@@ -6,8 +8,10 @@ use std::convert::{
 };
 use nom::{
     number::complete::{be_u8, be_u16},
-    multi::count,
+    bytes::complete::{take_until},
+    multi::{count, fold_many0},
     IResult,
+    Err,
     Parser,
     error::VerboseError
 };
@@ -118,7 +122,7 @@ impl TryFrom<u8> for CommandID {
 struct Attribute(AttributeID, u16, String);
 
 impl Attribute {
-    pub fn parse(i:&[u8]) -> IResult<&[u8], Self> {
+    fn parse(i: &[u8]) -> IResult<&[u8], Attribute> {
         let (i, id) = be_u8(i)?;
         let (i, length) = be_u16(i)?;
         let (i, attribute) = count(be_u8, length.into())(i)?;
@@ -215,7 +219,7 @@ struct GetNotificationAttributesRequest {
 impl Into<Vec<u8>> for GetNotificationAttributesRequest {
     fn into(self) -> Vec<u8> {
         let id = self.command_id as u8;
-        let notification_uuid = self.notification_uuid.to_le_bytes();
+        let notification_uuid: [u8; 4] = self.notification_uuid.to_le_bytes();
         let mut attribute_ids = self.attribute_ids.into_iter().map(|id| id as u8).collect();
 
         let mut v: Vec<u8> = Vec::new();
@@ -230,8 +234,18 @@ impl Into<Vec<u8>> for GetNotificationAttributesRequest {
 
 struct GetNotificationAttributesResponse {
     command_id: CommandID,
-    notification_uuid: u32,
+    notification_uuid: Vec<u8>,
     attribute_list: Vec<Attribute>,
+}
+
+impl GetNotificationAttributesResponse {
+    pub fn parse(i:&[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
+        let (i, command_id) = be_u8(i)?;
+        let (i, notification_uuid) = count(be_u8, 4)(i)?;
+        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+
+        Ok((i, GetNotificationAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), notification_uuid: notification_uuid, attribute_list: attribute_list } ))
+    }
 }
 
 struct GetAppAttributesRequest {
@@ -244,6 +258,16 @@ struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
     attribute_list: Vec<Attribute>,
+}
+
+impl GetAppAttributesResponse {
+    pub fn parse(i:&[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
+        let (i, command_id) = be_u8(i)?;
+        let (i, app_identifier) = take_until(" ")(i)?;
+        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+
+        Ok((i, GetAppAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(), attribute_list: attribute_list } ))
+    }
 }
 
 
