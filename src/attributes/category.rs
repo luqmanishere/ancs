@@ -1,3 +1,4 @@
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CategoryID {
     Other              = 0,
     IncomingCall       = 1,

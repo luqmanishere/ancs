@@ -1,4 +1,4 @@
-
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CommandID {
     GetNotificationAttributes = 0,
     GetAppAttributes          = 1,

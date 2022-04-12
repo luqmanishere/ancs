@@ -32,7 +32,7 @@ mod attribute_id {
     }
 }
 
-
+#[cfg(test)]
 mod attribute_list {
     use ancs::attributes::attribute::AttributeID;
     use ancs::attributes::attribute::Attribute;
