@@ -1,9 +1,10 @@
 use nom::{
-    number::complete::{be_u8, be_u16},
+    number::complete::{le_u8, le_u16},
     multi::{count},
     IResult,
 };
 
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum AttributeID {
     AppIdentifier       = 0,
     Title               = 1,
@@ -50,13 +51,14 @@ impl TryFrom<u8> for AttributeID {
 
 impl AttributeID {
     pub fn parse(i:&[u8]) -> IResult<&[u8], AttributeID> {
-        let (i, attribute_id) = be_u8(i)?;
+        let (i, attribute_id) = le_u8(i)?;
 
         Ok((i, AttributeID::try_from(attribute_id).unwrap() ))
     }
 }
 
-pub struct AttributeList(AttributeID, u16, String);
+#[derive(Debug, PartialEq, Clone)]
+pub struct AttributeList(pub AttributeID, pub u16, pub String);
 
 impl From<AttributeList> for Vec<u8> {
     fn from(original: AttributeList) -> Vec<u8> {
@@ -64,11 +66,11 @@ impl From<AttributeList> for Vec<u8> {
 
         let id: u8 = original.0.into();
         let length: [u8; 2] = original.1.to_le_bytes();
-        let mut attribute: Vec<u8> = original.2.into_bytes();
+        let attribute: Vec<u8> = original.2.into_bytes();
 
         vec.push(id);
-        vec.append(&mut length.to_vec());
-        vec.append(&mut attribute);
+        vec.extend(length.to_vec());
+        vec.extend(attribute);
 
         return vec;
     }
@@ -77,8 +79,8 @@ impl From<AttributeList> for Vec<u8> {
 impl AttributeList {
     pub fn parse(i: &[u8]) -> IResult<&[u8], AttributeList> {
         let (i, id) = AttributeID::parse(i)?;
-        let (i, length) = be_u16(i)?;
-        let (i, attribute) = count(be_u8, length.into())(i)?;
+        let (i, length) = le_u16(i)?;
+        let (i, attribute) = count(le_u8, length.into())(i)?;
 
         Ok((i, AttributeList(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
     }
