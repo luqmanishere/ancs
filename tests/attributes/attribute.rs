@@ -35,7 +35,7 @@ mod attribute_id {
 
 mod attribute_list {
     use ancs::attributes::attribute::AttributeID;
-    use ancs::attributes::attribute::AttributeList;
+    use ancs::attributes::attribute::Attribute;
 
     #[test]
     fn struct_to_u8() {
@@ -44,7 +44,7 @@ mod attribute_list {
         let attribute_data = "test".to_string();
         let attribute_length = attribute_data.as_bytes().len() as u16; 
 
-        let attribute: AttributeList = AttributeList(attribute_id, attribute_length, attribute_data);
+        let attribute: Attribute = Attribute(attribute_id, attribute_length, attribute_data);
         let attribute_bytes: Vec<u8> = attribute.clone().into();
 
         assert_eq!(u8::MIN, attribute_bytes[0]); // Identifier for attribute
@@ -63,11 +63,11 @@ mod attribute_list {
         let attribute_data = "test".to_string();
         let attribute_length = attribute_data.as_bytes().len() as u16; 
 
-        let attribute: AttributeList = AttributeList(attribute_id, attribute_length, attribute_data);
+        let attribute: Attribute = Attribute(attribute_id, attribute_length, attribute_data);
 
         // Convert into bytes and then parse out of bytes
         let attribute_bytes: Vec<u8>  = attribute.clone().into();
-        let parsed_attribute = AttributeList::parse(&attribute_bytes).unwrap();
+        let parsed_attribute = Attribute::parse(&attribute_bytes).unwrap();
 
         assert_eq!(attribute.2, parsed_attribute.1.2)
     }

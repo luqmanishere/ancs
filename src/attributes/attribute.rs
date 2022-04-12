@@ -58,10 +58,10 @@ impl AttributeID {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct AttributeList(pub AttributeID, pub u16, pub String);
+pub struct Attribute(pub AttributeID, pub u16, pub String);
 
-impl From<AttributeList> for Vec<u8> {
-    fn from(original: AttributeList) -> Vec<u8> {
+impl From<Attribute> for Vec<u8> {
+    fn from(original: Attribute) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
 
         let id: u8 = original.0.into();
@@ -76,12 +76,12 @@ impl From<AttributeList> for Vec<u8> {
     }
 }
 
-impl AttributeList {
-    pub fn parse(i: &[u8]) -> IResult<&[u8], AttributeList> {
+impl Attribute {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], Attribute> {
         let (i, id) = AttributeID::parse(i)?;
         let (i, length) = le_u16(i)?;
         let (i, attribute) = count(le_u8, length.into())(i)?;
 
-        Ok((i, AttributeList(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
+        Ok((i, Attribute(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
     }
 }

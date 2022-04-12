@@ -11,7 +11,7 @@ use nom::{
 struct GetNotificationAttributesResponse {
     command_id: CommandID,
     notification_uuid: Vec<u8>,
-    attribute_list: Vec<AttributeList>,
+    attribute_list: Vec<Attribute>,
 }
 
 impl From<GetNotificationAttributesResponse> for Vec<u8> {
@@ -39,7 +39,7 @@ impl GetNotificationAttributesResponse {
     pub fn parse(i:&[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, notification_uuid) = count(be_u8, 4)(i)?;
-        let (i, attribute_list) = many0(AttributeList::parse)(i)?;
+        let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
         Ok((i, GetNotificationAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), notification_uuid: notification_uuid, attribute_list: attribute_list } ))
     }
@@ -71,14 +71,14 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
 struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
-    attribute_list: Vec<AttributeList>,
+    attribute_list: Vec<Attribute>,
 }
 
 impl GetAppAttributesResponse {
     pub fn parse(i:&[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, app_identifier) = take_until(" ")(i)?;
-        let (i, attribute_list) = many0(AttributeList::parse)(i)?;
+        let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
         Ok((i, GetAppAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(), attribute_list: attribute_list } ))
     }
