@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EventID {
     NotificationAdded = 0,
     NotificationModified = 1,
@@ -28,7 +28,7 @@ impl TryFrom<u8> for EventID {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EventFlag {
     Silent         = 0b00000001,
     Important      = 0b00000010,

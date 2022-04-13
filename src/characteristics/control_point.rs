@@ -1,7 +1,7 @@
 pub use crate::attributes::attribute::*;
 pub use crate::attributes::command::*;
 
-struct GetNotificationAttributesRequest {
+pub struct GetNotificationAttributesRequest {
     command_id: CommandID,
     notification_uuid: u32,
     attribute_ids: Vec<AttributeID>,
@@ -23,7 +23,7 @@ impl Into<Vec<u8>> for GetNotificationAttributesRequest {
     }
 }
 
-struct GetAppAttributesRequest {
+pub struct GetAppAttributesRequest {
     command_id: CommandID,
     app_identifier: String,
     attribute_ids: Vec<AttributeID>,
