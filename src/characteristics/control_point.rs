@@ -1,6 +1,8 @@
 pub use crate::attributes::attribute::*;
 pub use crate::attributes::command::*;
 
+pub const CONTROL_POINT_UUID: &str = "69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9";
+
 pub struct GetNotificationAttributesRequest {
     command_id: CommandID,
     notification_uuid: u32,

@@ -8,6 +8,8 @@ use nom::{
     IResult,
 };
 
+pub const DATA_SOURCE_UUID: &str = "22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB";
+
 struct GetNotificationAttributesResponse {
     command_id: CommandID,
     notification_uuid: Vec<u8>,
