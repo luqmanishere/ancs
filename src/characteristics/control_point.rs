@@ -4,9 +4,9 @@ pub use crate::attributes::command::*;
 pub const CONTROL_POINT_UUID: &str = "69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9";
 
 pub struct GetNotificationAttributesRequest {
-    command_id: CommandID,
-    notification_uuid: u32,
-    attribute_ids: Vec<AttributeID>,
+    pub command_id: CommandID,
+    pub notification_uuid: u32,
+    pub attribute_ids: Vec<AttributeID>,
 }
 
 impl Into<Vec<u8>> for GetNotificationAttributesRequest {
