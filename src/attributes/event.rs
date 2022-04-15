@@ -53,12 +53,12 @@ impl TryFrom<u8> for EventFlag {
     type Error = ();
 
     fn try_from(original: u8) -> Result<Self, Self::Error> {
-        match original {
-            0b00000001 => Ok(EventFlag::Silent),
-            0b00000010 => Ok(EventFlag::Important),
-            0b00000100 => Ok(EventFlag::PreExisting),
-            0b00001000 => Ok(EventFlag::PositiveAction),
-            0b00010000 => Ok(EventFlag::NegativeAction),
+        match original.trailing_zeros() {
+            0 => Ok(EventFlag::Silent),
+            1 => Ok(EventFlag::Important),
+            2 => Ok(EventFlag::PreExisting),
+            3 => Ok(EventFlag::PositiveAction),
+            4 => Ok(EventFlag::NegativeAction),
             _ => Err(())
         }
     }

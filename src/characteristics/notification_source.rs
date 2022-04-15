@@ -7,7 +7,7 @@ use nom::{
     IResult,
 };
 
-pub const NOTIFICATION_SOURCE_UUID: &str = "936DA01F9ABD4d9d80C702AF85C822A8";
+pub const NOTIFICATION_SOURCE_UUID: &str = "9FBF120D-6301-42D9-8C58-25E699A21DBD";
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct GattNotification {
