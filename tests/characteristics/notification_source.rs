@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod category_id {
-    use ancs::attributes::event::EventID;
-    use ancs::attributes::event::EventFlag;
     use ancs::attributes::category::CategoryID;
+    use ancs::attributes::event::EventFlag;
+    use ancs::attributes::event::EventID;
     use ancs::characteristics::notification_source::GattNotification;
 
     #[test]
@@ -16,16 +16,7 @@ mod category_id {
         };
 
         let notification_bytes: [u8; 8] = notification.into();
-        let expected_bytes: [u8; 8] = [
-            0,
-            1,
-            0,
-            0,
-            255,
-            255,
-            255,
-            255,
-        ];
+        let expected_bytes: [u8; 8] = [0, 1, 0, 0, 255, 255, 255, 255];
 
         assert_eq!(notification_bytes, expected_bytes)
     }

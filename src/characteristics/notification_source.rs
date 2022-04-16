@@ -1,11 +1,7 @@
-pub use crate::attributes::event::*;
 pub use crate::attributes::category::*;
+pub use crate::attributes::event::*;
 
-use nom::{
-    number::complete::{le_u8},
-    multi::{count},
-    IResult,
-};
+use nom::{multi::count, number::complete::le_u8, IResult};
 
 pub const NOTIFICATION_SOURCE_UUID: &str = "9FBF120D-6301-42D9-8C58-25E699A21DBD";
 
@@ -19,20 +15,23 @@ pub struct GattNotification {
 }
 
 impl GattNotification {
-    pub fn parse(i:&[u8]) -> IResult<&[u8], GattNotification> {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], GattNotification> {
         let (i, event_id) = le_u8(i)?;
         let (i, event_flags) = le_u8(i)?;
         let (i, category_id) = le_u8(i)?;
         let (i, category_count) = le_u8(i)?;
         let (i, notification_uuid) = count(le_u8, 4)(i)?;
 
-        Ok((i, GattNotification { 
-            event_id: EventID::try_from(event_id).unwrap(), 
-            event_flags: EventFlag::try_from(event_flags).unwrap(), 
-            category_id: CategoryID::try_from(category_id).unwrap(), 
-            category_count, 
-            notification_uuid: u32::from_le_bytes(notification_uuid.try_into().unwrap())
-        }))
+        Ok((
+            i,
+            GattNotification {
+                event_id: EventID::try_from(event_id).unwrap(),
+                event_flags: EventFlag::try_from(event_flags).unwrap(),
+                category_id: CategoryID::try_from(category_id).unwrap(),
+                category_count,
+                notification_uuid: u32::from_le_bytes(notification_uuid.try_into().unwrap()),
+            },
+        ))
     }
 }
 

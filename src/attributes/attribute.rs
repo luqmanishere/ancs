@@ -1,17 +1,17 @@
 use nom::{
-    number::complete::{le_u8, le_u16},
-    multi::{count},
+    multi::count,
+    number::complete::{le_u16, le_u8},
     IResult,
 };
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum AttributeID {
-    AppIdentifier       = 0,
-    Title               = 1,
-    Subtitle            = 2,
-    Message             = 3,
-    MessageSize         = 4,
-    Date                = 5,
+    AppIdentifier = 0,
+    Title = 1,
+    Subtitle = 2,
+    Message = 3,
+    MessageSize = 4,
+    Date = 5,
     PositiveActionLabel = 6,
     NegativeActionLabel = 7,
 }
@@ -19,12 +19,12 @@ pub enum AttributeID {
 impl From<AttributeID> for u8 {
     fn from(original: AttributeID) -> u8 {
         match original {
-            AttributeID::AppIdentifier       => 0,
-            AttributeID::Title               => 1,
-            AttributeID::Subtitle            => 2,
-            AttributeID::Message             => 3,
-            AttributeID::MessageSize         => 4,
-            AttributeID::Date                => 5,
+            AttributeID::AppIdentifier => 0,
+            AttributeID::Title => 1,
+            AttributeID::Subtitle => 2,
+            AttributeID::Message => 3,
+            AttributeID::MessageSize => 4,
+            AttributeID::Date => 5,
             AttributeID::PositiveActionLabel => 6,
             AttributeID::NegativeActionLabel => 7,
         }
@@ -44,16 +44,16 @@ impl TryFrom<u8> for AttributeID {
             5 => Ok(AttributeID::Date),
             6 => Ok(AttributeID::PositiveActionLabel),
             7 => Ok(AttributeID::NegativeActionLabel),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
 
 impl AttributeID {
-    pub fn parse(i:&[u8]) -> IResult<&[u8], AttributeID> {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], AttributeID> {
         let (i, attribute_id) = le_u8(i)?;
 
-        Ok((i, AttributeID::try_from(attribute_id).unwrap() ))
+        Ok((i, AttributeID::try_from(attribute_id).unwrap()))
     }
 }
 
@@ -82,6 +82,13 @@ impl Attribute {
         let (i, length) = le_u16(i)?;
         let (i, attribute) = count(le_u8, length.into())(i)?;
 
-        Ok((i, Attribute(AttributeID::try_from(id).unwrap(), length, String::from_utf8(attribute).unwrap())))
+        Ok((
+            i,
+            Attribute(
+                AttributeID::try_from(id).unwrap(),
+                length,
+                String::from_utf8(attribute).unwrap(),
+            ),
+        ))
     }
 }

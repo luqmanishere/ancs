@@ -2,9 +2,9 @@ pub use crate::attributes::attribute::*;
 pub use crate::attributes::command::*;
 
 use nom::{
-    bytes::complete::{take_until},
-    number::complete::{be_u8},
+    bytes::complete::take_until,
     multi::{count, many0},
+    number::complete::be_u8,
     IResult,
 };
 
@@ -24,11 +24,13 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
         let mut app_identifier: Vec<u8> = original.notification_uuid;
-        let mut attribute_ids: Vec<u8> = original.attribute_list
+        let mut attribute_ids: Vec<u8> = original
+            .attribute_list
             .into_iter()
             .map(|attribute| attribute.into())
             .into_iter()
-            .flat_map(|att: Vec<u8>| att).collect();
+            .flat_map(|att: Vec<u8>| att)
+            .collect();
 
         vec.push(command_id);
         vec.append(&mut app_identifier);
@@ -39,12 +41,19 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 }
 
 impl GetNotificationAttributesResponse {
-    pub fn parse(i:&[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, notification_uuid) = count(be_u8, 4)(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
-        Ok((i, GetNotificationAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), notification_uuid: notification_uuid, attribute_list: attribute_list } ))
+        Ok((
+            i,
+            GetNotificationAttributesResponse {
+                command_id: CommandID::try_from(command_id).unwrap(),
+                notification_uuid: notification_uuid,
+                attribute_list: attribute_list,
+            },
+        ))
     }
 }
 
@@ -61,7 +70,11 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
         let mut app_identifier: Vec<u8> = original.app_identifier.into_bytes();
-        let mut attribute_ids: Vec<u8> = original.attribute_ids.into_iter().map(|id| id.into()).collect();
+        let mut attribute_ids: Vec<u8> = original
+            .attribute_ids
+            .into_iter()
+            .map(|id| id.into())
+            .collect();
 
         vec.push(command_id);
         vec.append(&mut app_identifier);
@@ -78,12 +91,18 @@ struct GetAppAttributesResponse {
 }
 
 impl GetAppAttributesResponse {
-    pub fn parse(i:&[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
         let (i, command_id) = be_u8(i)?;
         let (i, app_identifier) = take_until(" ")(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
-        Ok((i, GetAppAttributesResponse { command_id: CommandID::try_from(command_id).unwrap(), app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(), attribute_list: attribute_list } ))
+        Ok((
+            i,
+            GetAppAttributesResponse {
+                command_id: CommandID::try_from(command_id).unwrap(),
+                app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(),
+                attribute_list: attribute_list,
+            },
+        ))
     }
 }
-

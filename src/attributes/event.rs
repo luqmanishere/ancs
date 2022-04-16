@@ -8,9 +8,9 @@ pub enum EventID {
 impl From<EventID> for u8 {
     fn from(original: EventID) -> u8 {
         match original {
-            EventID::NotificationAdded    => 0,
+            EventID::NotificationAdded => 0,
             EventID::NotificationModified => 1,
-            EventID::NotificationRemoved  => 2,
+            EventID::NotificationRemoved => 2,
         }
     }
 }
@@ -23,16 +23,16 @@ impl TryFrom<u8> for EventID {
             0 => Ok(EventID::NotificationAdded),
             1 => Ok(EventID::NotificationModified),
             2 => Ok(EventID::NotificationRemoved),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EventFlag {
-    Silent         = 0b00000001,
-    Important      = 0b00000010,
-    PreExisting    = 0b00000100,
+    Silent = 0b00000001,
+    Important = 0b00000010,
+    PreExisting = 0b00000100,
     PositiveAction = 0b00001000,
     NegativeAction = 0b00010000,
 }
@@ -40,11 +40,11 @@ pub enum EventFlag {
 impl From<EventFlag> for u8 {
     fn from(original: EventFlag) -> u8 {
         match original {
-            EventFlag::Silent         => 0b00000001,
-            EventFlag::Important      => 0b00000010,
-            EventFlag::PreExisting    => 0b00000100,
+            EventFlag::Silent => 0b00000001,
+            EventFlag::Important => 0b00000010,
+            EventFlag::PreExisting => 0b00000100,
             EventFlag::PositiveAction => 0b00001000,
-            EventFlag::NegativeAction => 0b00010000
+            EventFlag::NegativeAction => 0b00010000,
         }
     }
 }
@@ -59,7 +59,7 @@ impl TryFrom<u8> for EventFlag {
             2 => Ok(EventFlag::PreExisting),
             3 => Ok(EventFlag::PositiveAction),
             4 => Ok(EventFlag::NegativeAction),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 }
