@@ -12,7 +12,7 @@ mod category_id {
             event_flags: EventFlag::Silent,
             category_id: CategoryID::Other,
             category_count: 0,
-            notification_uuid: 4294967295_u32,
+            notification_uid: 4294967295_u32,
         };
 
         let notification_bytes: [u8; 8] = notification.into();
@@ -28,7 +28,7 @@ mod category_id {
             event_flags: EventFlag::Silent,
             category_id: CategoryID::Other,
             category_count: 0,
-            notification_uuid: 4294967295_u32,
+            notification_uid: 4294967295_u32,
         };
 
         let notification_bytes: [u8; 8] = notification.into();
@@ -39,6 +39,6 @@ mod category_id {
         assert_eq!(parsed_notification.event_flags, EventFlag::Silent);
         assert_eq!(parsed_notification.category_id, CategoryID::Other);
         assert_eq!(parsed_notification.category_count, 0);
-        assert_eq!(parsed_notification.notification_uuid, 4294967295_u32);
+        assert_eq!(parsed_notification.notification_uid, 4294967295_u32);
     }
 }

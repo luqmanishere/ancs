@@ -4,7 +4,7 @@ pub use crate::attributes::command::*;
 use nom::{
     bytes::complete::take_until,
     multi::{count, many0},
-    number::complete::be_u8,
+    number::complete::le_u8,
     IResult,
 };
 
@@ -42,8 +42,8 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 
 impl GetNotificationAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
-        let (i, command_id) = be_u8(i)?;
-        let (i, notification_uuid) = count(be_u8, 4)(i)?;
+        let (i, command_id) = le_u8(i)?;
+        let (i, notification_uuid) = count(le_u8, 4)(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
         Ok((
@@ -92,7 +92,7 @@ struct GetAppAttributesResponse {
 
 impl GetAppAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
-        let (i, command_id) = be_u8(i)?;
+        let (i, command_id) = le_u8(i)?;
         let (i, app_identifier) = take_until(" ")(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 

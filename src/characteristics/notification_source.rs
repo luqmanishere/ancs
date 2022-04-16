@@ -11,7 +11,7 @@ pub struct GattNotification {
     pub event_flags: EventFlag,
     pub category_id: CategoryID,
     pub category_count: u8,
-    pub notification_uuid: u32,
+    pub notification_uid: u32,
 }
 
 impl GattNotification {
@@ -29,7 +29,7 @@ impl GattNotification {
                 event_flags: EventFlag::try_from(event_flags).unwrap(),
                 category_id: CategoryID::try_from(category_id).unwrap(),
                 category_count,
-                notification_uuid: u32::from_le_bytes(notification_uuid.try_into().unwrap()),
+                notification_uid: u32::from_le_bytes(notification_uuid.try_into().unwrap()),
             },
         ))
     }
@@ -38,7 +38,7 @@ impl GattNotification {
 impl From<GattNotification> for [u8; 8] {
     fn from(original: GattNotification) -> [u8; 8] {
         let mut bytes: [u8; 8] = [0; 8];
-        let uuid_as_u8 = original.notification_uuid.to_le_bytes();
+        let uuid_as_u8 = original.notification_uid.to_le_bytes();
 
         bytes[0] = original.event_id as u8;
         bytes[1] = original.event_flags as u8;
