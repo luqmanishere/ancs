@@ -13,7 +13,38 @@ impl Into<Vec<u8>> for GetNotificationAttributesRequest {
     fn into(self) -> Vec<u8> {
         let id = self.command_id as u8;
         let notification_uuid: [u8; 4] = self.notification_uuid.to_le_bytes();
-        let mut attribute_ids = self.attribute_ids.into_iter().map(|id| id as u8).collect();
+
+        // Note we default the max size for attributes that require it to max to simplify the
+        // rest of this programs structures this may change in the future based on consumers
+        // demands.
+        let mut attribute_ids: Vec<u8> = Vec::new();
+
+        self.attribute_ids.into_iter().for_each(|id| {
+            match id {
+                AttributeID::Title => {
+                    let byte: u8 = id.into();
+                    let length_bytes: [u8; 2] = 65535_u16.to_le_bytes();
+                    attribute_ids.push(byte);
+                    attribute_ids.extend(length_bytes);
+                },
+                AttributeID::Subtitle => {
+                    let byte: u8 = id.into();
+                    let length_bytes: [u8; 2] = 65535_u16.to_le_bytes();
+                    attribute_ids.push(byte);
+                    attribute_ids.extend(length_bytes);
+                },
+                AttributeID::Message => {
+                    let byte: u8 = id.into();
+                    let length_bytes: [u8; 2] = 65535_u16.to_le_bytes();
+                    attribute_ids.push(byte);
+                    attribute_ids.extend(length_bytes);
+                },
+                _ => {
+                    let bytes: u8 = id.into();
+                    attribute_ids.push(bytes);
+                }
+            };
+        });
 
         let mut v: Vec<u8> = Vec::new();
         
