@@ -5,14 +5,14 @@ pub const CONTROL_POINT_UUID: &str = "69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9";
 
 pub struct GetNotificationAttributesRequest {
     pub command_id: CommandID,
-    pub notification_uuid: u32,
+    pub notification_uid: u32,
     pub attribute_ids: Vec<AttributeID>,
 }
 
 impl Into<Vec<u8>> for GetNotificationAttributesRequest {
     fn into(self) -> Vec<u8> {
         let id = self.command_id as u8;
-        let notification_uuid: [u8; 4] = self.notification_uuid.to_le_bytes();
+        let notification_uid: [u8; 4] = self.notification_uid.to_le_bytes();
 
         // Note we default the max size for attributes that require it to max to simplify the
         // rest of this programs structures this may change in the future based on consumers
@@ -49,7 +49,7 @@ impl Into<Vec<u8>> for GetNotificationAttributesRequest {
         let mut v: Vec<u8> = Vec::new();
 
         v.push(id);
-        v.extend(notification_uuid);
+        v.extend(notification_uid);
         v.append(&mut attribute_ids);
 
         return v;

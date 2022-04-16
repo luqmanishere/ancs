@@ -13,7 +13,7 @@ pub const DATA_SOURCE_UUID: &str = "22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB";
 #[derive(Debug, PartialEq, Clone)]
 pub struct GetNotificationAttributesResponse {
     pub command_id: CommandID,
-    pub notification_uuid: Vec<u8>,
+    pub notification_uid: Vec<u8>,
     pub attribute_list: Vec<Attribute>,
 }
 
@@ -23,7 +23,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
-        let mut app_identifier: Vec<u8> = original.notification_uuid;
+        let mut app_identifier: Vec<u8> = original.notification_uid;
         let mut attribute_ids: Vec<u8> = original
             .attribute_list
             .into_iter()
@@ -43,14 +43,14 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 impl GetNotificationAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = le_u8(i)?;
-        let (i, notification_uuid) = count(le_u8, 4)(i)?;
+        let (i, notification_uid) = count(le_u8, 4)(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
         Ok((
             i,
             GetNotificationAttributesResponse {
                 command_id: CommandID::try_from(command_id).unwrap(),
-                notification_uuid: notification_uuid,
+                notification_uid: notification_uid,
                 attribute_list: attribute_list,
             },
         ))
