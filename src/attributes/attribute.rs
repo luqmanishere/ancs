@@ -71,7 +71,7 @@ impl AttributeID {
 pub struct Attribute {
     pub id: AttributeID, 
     pub length: u16, 
-    pub value: String
+    pub value: Option<String>
 }
 
 impl From<Attribute> for Vec<u8> {
@@ -80,11 +80,19 @@ impl From<Attribute> for Vec<u8> {
 
         let id: u8 = original.id.into();
         let length: [u8; 2] = original.length.to_le_bytes();
-        let attribute: Vec<u8> = original.value.into_bytes();
+        let attribute: Option<Vec<u8>> = match original.value {
+            Some(value) => { Some(value.into_bytes()) },
+            None => None,
+        };
 
         vec.push(id);
         vec.extend(length.to_vec());
-        vec.extend(attribute);
+
+        // If the attribute's value isn't null we add it to our bytes.
+        match attribute {
+            Some(attribute) => { vec.extend(attribute)},
+            None => (),
+        };
 
         return vec;
     }
@@ -101,7 +109,7 @@ impl Attribute {
             Attribute {
                 id: AttributeID::try_from(id).unwrap(),
                 length: length,
-                value: String::from_utf8(attribute).unwrap(),
+                value: Some(String::from_utf8(attribute).unwrap()),
             },
         ))
     }

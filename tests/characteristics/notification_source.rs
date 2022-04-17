@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod category_id {
+mod gatt_notification {
     use ancs::attributes::category::CategoryID;
     use ancs::attributes::event::EventFlag;
     use ancs::attributes::event::EventID;

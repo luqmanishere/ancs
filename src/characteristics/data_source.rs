@@ -23,7 +23,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
-        let app_identifier: [u8; 4] = original.notification_uid.to_le_bytes();
+        let notification_uid: [u8; 4] = original.notification_uid.to_le_bytes();
         let mut attribute_ids: Vec<u8> = original
             .attribute_list
             .into_iter()
@@ -33,7 +33,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
             .collect();
 
         vec.push(command_id);
-        vec.append(&mut app_identifier.into());
+        vec.append(&mut notification_uid.into());
         vec.append(&mut attribute_ids);
 
         return vec;
@@ -57,37 +57,43 @@ impl GetNotificationAttributesResponse {
     }
 }
 
-struct GetAppAttributesRequest {
-    command_id: CommandID,
-    app_identifier: String,
-    attribute_ids: Vec<AttributeID>,
-}
-
-impl From<GetAppAttributesRequest> for Vec<u8> {
-    fn from(original: GetAppAttributesRequest) -> Vec<u8> {
-        let mut vec: Vec<u8> = Vec::new();
-
-        // Convert all attributes to bytes
-        let command_id: u8 = original.command_id.into();
-        let mut app_identifier: Vec<u8> = original.app_identifier.into_bytes();
-        let mut attribute_ids: Vec<u8> = original
-            .attribute_ids
-            .into_iter()
-            .map(|id| id.into())
-            .collect();
-
-        vec.push(command_id);
-        vec.append(&mut app_identifier);
-        vec.append(&mut attribute_ids);
-
-        return vec;
-    }
-}
-
+#[derive(Debug, PartialEq, Clone)]
 struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
     attribute_list: Vec<Attribute>,
+}
+
+impl From<GetAppAttributesResponse> for Vec<u8> {
+    fn from(original: GetAppAttributesResponse) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::new();
+
+        // Convert all attributes to bytes
+        let command_id: u8 = original.command_id.into();
+        let mut app_identifier: Vec<u8> = original.app_identifier.as_bytes().to_vec();
+        let mut attribute_ids: Vec<u8> = original
+            .attribute_list
+            .into_iter()
+            .map(|attribute| attribute.into())
+            .into_iter()
+            .flat_map(|att: Vec<u8>| att)
+            .collect();
+
+        // Rust strings are not null terminated by default 
+        // however it is possible that the user knows to insert
+        // a null terminated string of some kind this helps us
+        // ensure that all strings submitted to ANCS are null
+        // terminated UTF-8 byte strings.
+        if app_identifier.last().unwrap() != &0_u8 {
+            app_identifier.push(0);
+        }
+
+        vec.push(command_id);
+        vec.append(&mut app_identifier.into());
+        vec.append(&mut attribute_ids);
+
+        return vec;
+    }
 }
 
 impl GetAppAttributesResponse {

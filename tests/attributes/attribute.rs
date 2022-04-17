@@ -47,7 +47,7 @@ mod attribute_list {
         let attribute: Attribute = Attribute {
             id: attribute_id, 
             length: attribute_length,
-            value: attribute_value
+            value: Some(attribute_value)
         };
 
         let attribute_bytes: Vec<u8> = attribute.clone().into();
@@ -71,7 +71,7 @@ mod attribute_list {
         let attribute: Attribute = Attribute {
             id: attribute_id,
             length: attribute_length,
-            value: attribute_data
+            value: Some(attribute_data)
         };
 
         // Convert into bytes and then parse out of bytes

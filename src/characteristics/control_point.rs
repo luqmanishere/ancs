@@ -2,15 +2,14 @@ pub use crate::attributes::attribute::*;
 pub use crate::attributes::command::*;
 
 use nom::{
-    bytes::complete::take_until,
-    number::complete::be_u16,
-    combinator::{opt, peek, fail},
+    bytes::complete::{tag,take_until, take_till},
+    combinator::{opt, fail},
     number::complete::le_u16,
-    combinator::{cond, map, verify, recognize},
-    multi::{count, many0},
+    combinator::{verify},
+    multi::{many0},
     number::complete::{le_u8, le_u32},
     branch::{alt},
-    sequence::{pair, tuple, preceded},
+    sequence::{pair, terminated},
     IResult,
 };
 
@@ -87,9 +86,9 @@ impl GetNotificationAttributesRequest {
 }
 
 pub struct GetAppAttributesRequest {
-    command_id: CommandID,
-    app_identifier: String,
-    attribute_ids: Vec<AttributeID>,
+    pub command_id: CommandID,
+    pub app_identifier: String,
+    pub attribute_ids: Vec<AttributeID>,
 }
 
 impl From<GetAppAttributesRequest> for Vec<u8> {
@@ -105,10 +104,40 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
             .map(|id| id.into())
             .collect();
 
+        // Rust strings are not null terminated by default 
+        // however it is possible that the user knows to insert
+        // a null terminated string of some kind this helps us
+        // ensure that all strings submitted to ANCS are null
+        // terminated UTF-8 byte strings.
+        if app_identifier.last().unwrap() != &0_u8 {
+            app_identifier.push(0);
+        }
+
         vec.push(command_id);
         vec.append(&mut app_identifier);
         vec.append(&mut attribute_ids);
 
         return vec;
+    }
+}
+
+impl GetAppAttributesRequest {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesRequest> {
+        let (i, command_id) = le_u8(i)?;
+        let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
+        let (i, attribute_ids) = many0(
+            AttributeID::parse
+        )(i)?; 
+
+        println!("{:?}", attribute_ids);
+
+        Ok((
+            i,
+            GetAppAttributesRequest {
+                command_id: CommandID::try_from(command_id).unwrap(),
+                app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(),
+                attribute_ids: attribute_ids,
+            },
+        ))
     }
 }
