@@ -41,10 +41,15 @@ mod attribute_list {
     fn struct_to_u8() {
         // Create our fake attribute
         let attribute_id = AttributeID::AppIdentifier;
-        let attribute_data = "test".to_string();
-        let attribute_length = attribute_data.as_bytes().len() as u16;
+        let attribute_value = "test".to_string();
+        let attribute_length = attribute_value.as_bytes().len() as u16;
 
-        let attribute: Attribute = Attribute(attribute_id, attribute_length, attribute_data);
+        let attribute: Attribute = Attribute {
+            id: attribute_id, 
+            length: attribute_length,
+            value: attribute_value
+        };
+
         let attribute_bytes: Vec<u8> = attribute.clone().into();
 
         assert_eq!(u8::MIN, attribute_bytes[0]); // Identifier for attribute
@@ -63,12 +68,16 @@ mod attribute_list {
         let attribute_data = "test".to_string();
         let attribute_length = attribute_data.as_bytes().len() as u16;
 
-        let attribute: Attribute = Attribute(attribute_id, attribute_length, attribute_data);
+        let attribute: Attribute = Attribute {
+            id: attribute_id,
+            length: attribute_length,
+            value: attribute_data
+        };
 
         // Convert into bytes and then parse out of bytes
         let attribute_bytes: Vec<u8> = attribute.clone().into();
         let parsed_attribute = Attribute::parse(&attribute_bytes).unwrap();
 
-        assert_eq!(attribute.2, parsed_attribute.1 .2)
+        assert_eq!(attribute, parsed_attribute.1)
     }
 }

@@ -3,8 +3,8 @@ pub use crate::attributes::command::*;
 
 use nom::{
     bytes::complete::take_until,
-    multi::{count, many0},
-    number::complete::le_u8,
+    multi::{many0},
+    number::complete::{le_u8, le_u32},
     IResult,
 };
 
@@ -13,7 +13,7 @@ pub const DATA_SOURCE_UUID: &str = "22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB";
 #[derive(Debug, PartialEq, Clone)]
 pub struct GetNotificationAttributesResponse {
     pub command_id: CommandID,
-    pub notification_uid: Vec<u8>,
+    pub notification_uid: u32,
     pub attribute_list: Vec<Attribute>,
 }
 
@@ -23,7 +23,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
-        let mut app_identifier: Vec<u8> = original.notification_uid;
+        let app_identifier: [u8; 4] = original.notification_uid.to_le_bytes();
         let mut attribute_ids: Vec<u8> = original
             .attribute_list
             .into_iter()
@@ -33,7 +33,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
             .collect();
 
         vec.push(command_id);
-        vec.append(&mut app_identifier);
+        vec.append(&mut app_identifier.into());
         vec.append(&mut attribute_ids);
 
         return vec;
@@ -43,7 +43,7 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 impl GetNotificationAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = le_u8(i)?;
-        let (i, notification_uid) = count(le_u8, 4)(i)?;
+        let (i, notification_uid) = le_u32(i)?;
         let (i, attribute_list) = many0(Attribute::parse)(i)?;
 
         Ok((

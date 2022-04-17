@@ -1,5 +1,6 @@
 use nom::{
     multi::count,
+    combinator::peek,
     number::complete::{le_u16, le_u8},
     IResult,
 };
@@ -55,18 +56,31 @@ impl AttributeID {
 
         Ok((i, AttributeID::try_from(attribute_id).unwrap()))
     }
+
+    pub fn is_sized(id: AttributeID) -> bool {
+        match id {
+            AttributeID::Title => true,
+            AttributeID::Subtitle => true,
+            AttributeID::Message => true,
+            _ => false
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Attribute(pub AttributeID, pub u16, pub String);
+pub struct Attribute {
+    pub id: AttributeID, 
+    pub length: u16, 
+    pub value: String
+}
 
 impl From<Attribute> for Vec<u8> {
     fn from(original: Attribute) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
 
-        let id: u8 = original.0.into();
-        let length: [u8; 2] = original.1.to_le_bytes();
-        let attribute: Vec<u8> = original.2.into_bytes();
+        let id: u8 = original.id.into();
+        let length: [u8; 2] = original.length.to_le_bytes();
+        let attribute: Vec<u8> = original.value.into_bytes();
 
         vec.push(id);
         vec.extend(length.to_vec());
@@ -84,11 +98,11 @@ impl Attribute {
 
         Ok((
             i,
-            Attribute(
-                AttributeID::try_from(id).unwrap(),
-                length,
-                String::from_utf8(attribute).unwrap(),
-            ),
+            Attribute {
+                id: AttributeID::try_from(id).unwrap(),
+                length: length,
+                value: String::from_utf8(attribute).unwrap(),
+            },
         ))
     }
 }
