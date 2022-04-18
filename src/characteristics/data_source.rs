@@ -58,7 +58,7 @@ impl GetNotificationAttributesResponse {
 }
 
 #[derive(Debug, PartialEq, Clone)]
-struct GetAppAttributesResponse {
+pub struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
     attribute_list: Vec<Attribute>,

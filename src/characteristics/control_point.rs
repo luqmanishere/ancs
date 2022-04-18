@@ -88,7 +88,7 @@ impl GetNotificationAttributesRequest {
 pub struct GetAppAttributesRequest {
     pub command_id: CommandID,
     pub app_identifier: String,
-    pub attribute_ids: Vec<AttributeID>,
+    pub attribute_ids: Vec<AppAttributeID>,
 }
 
 impl From<GetAppAttributesRequest> for Vec<u8> {
@@ -126,7 +126,7 @@ impl GetAppAttributesRequest {
         let (i, command_id) = le_u8(i)?;
         let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
         let (i, attribute_ids) = many0(
-            AttributeID::parse
+            AppAttributeID::parse
         )(i)?; 
 
         println!("{:?}", attribute_ids);

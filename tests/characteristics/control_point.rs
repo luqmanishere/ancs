@@ -32,7 +32,7 @@ mod get_notification_attributes_request {
 #[cfg(test)]
 mod get_app_attributes_request {
     use ancs::attributes::command::CommandID;
-    use ancs::attributes::attribute::AttributeID;
+    use ancs::attributes::attribute::AppAttributeID;
     use ancs::characteristics::control_point::GetAppAttributesRequest;
 
     #[test]
@@ -40,23 +40,23 @@ mod get_app_attributes_request {
         let notification: GetAppAttributesRequest = GetAppAttributesRequest {
             command_id: CommandID::GetNotificationAttributes,
             app_identifier: "Test".to_string(),
-            attribute_ids: vec![AttributeID::AppIdentifier, AttributeID::Title],
+            attribute_ids: vec![AppAttributeID::DisplayName],
         };
 
         let notification_bytes: Vec<u8> = notification.into();
-        let expected_bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0, 1];
+        let expected_bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
 
         assert_eq!(notification_bytes, expected_bytes)
     }
 
     #[test]
     fn bytes_to_struct() {
-        let bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0, 1];
+        let bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
         let notification = GetAppAttributesRequest::parse(&bytes).unwrap();
 
         assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
         assert_eq!(notification.1.app_identifier, "Test");
-        assert_eq!(notification.1.attribute_ids, vec![AttributeID::AppIdentifier, AttributeID::Title]);
+        assert_eq!(notification.1.attribute_ids, vec![AppAttributeID::DisplayName]);
     }
 }
 

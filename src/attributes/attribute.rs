@@ -67,6 +67,39 @@ impl AttributeID {
     }
 }
 
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum AppAttributeID {
+    DisplayName = 0,
+}
+
+impl From<AppAttributeID> for u8 {
+    fn from(original: AppAttributeID) -> u8 {
+        match original {
+            AppAttributeID::DisplayName => 0,
+        }
+    }
+}
+
+impl TryFrom<u8> for AppAttributeID {
+    type Error = ();
+
+    fn try_from(original: u8) -> Result<Self, Self::Error> {
+        match original {
+            0 => Ok(AppAttributeID::DisplayName),
+            _ => Err(()),
+        }
+    }
+}
+
+impl AppAttributeID {
+    pub fn parse(i: &[u8]) -> IResult<&[u8], AppAttributeID> {
+        let (i, attribute_id) = le_u8(i)?;
+
+        Ok((i, AppAttributeID::try_from(attribute_id).unwrap()))
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct Attribute {
     pub id: AttributeID, 
