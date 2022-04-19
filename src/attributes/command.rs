@@ -6,6 +6,15 @@ pub enum CommandID {
 }
 
 impl From<CommandID> for u8 {
+    /// Converts a `CommandID` to a `u8` representaiton
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// let data: u8 = CommandID::GetNotificationAttributes.into();
+    /// 
+    /// assert_eq!(0, data);
+    /// ```
     fn from(original: CommandID) -> u8 {
         match original {
             CommandID::GetNotificationAttributes => 0,
@@ -17,7 +26,15 @@ impl From<CommandID> for u8 {
 
 impl TryFrom<u8> for CommandID {
     type Error = ();
-
+    /// Attempts to convert a `u8` to a valid `CommandID`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// let command: CommandID = CommandID::try_from(0).unwrap();
+    /// 
+    /// assert_eq!(CommandID::GetNotificationAttributes, command);
+    /// ```
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(CommandID::GetNotificationAttributes),

@@ -15,6 +15,17 @@ pub enum CategoryID {
 }
 
 impl From<CategoryID> for u8 {
+    /// Converts an `CategoryID` to its binary represenation
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `CategoryID` to a `u8`:
+    /// ```
+    /// # use ancs::attributes::category::CategoryID;
+    /// let data: u8 = CategoryID::Other.into();
+    /// 
+    /// assert_eq!(0, data);
+    /// ```
     fn from(original: CategoryID) -> u8 {
         match original {
             CategoryID::Other => 0,
@@ -36,6 +47,17 @@ impl From<CategoryID> for u8 {
 impl TryFrom<u8> for CategoryID {
     type Error = ();
 
+    /// Attempts to convert a u8 to a valid `CategoryID`
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// let attribute: AppAttributeID = AppAttributeID::try_from(0).unwrap();
+    /// 
+    /// assert_eq!(AppAttributeID::DisplayName, attribute);
+    /// ```
+    /// 
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(CategoryID::Other),

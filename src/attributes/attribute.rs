@@ -24,8 +24,7 @@ impl From<AttributeID> for u8 {
     /// 
     /// Convert a `AttributeID` to a `u8`:
     /// ```
-    /// use ancs::attributes::attribute::AttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AttributeID;
     /// let data: u8 = AttributeID::AppIdentifier.into();
     /// 
     /// assert_eq!(0, data);
@@ -52,8 +51,7 @@ impl TryFrom<u8> for AttributeID {
     /// # Examples
     /// 
     /// ```
-    /// use ancs::attributes::attribute::AttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AttributeID;
     /// let attribute: AttributeID = AttributeID::try_from(0).unwrap();
     /// 
     /// assert_eq!(AttributeID::AppIdentifier, attribute);
@@ -80,8 +78,7 @@ impl AttributeID {
     /// # Examples
     /// 
     /// ```
-    /// use ancs::attributes::attribute::AttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AttributeID;
     /// let data: [u8; 2] = [0, 1];
     /// let (data, attribute) = AttributeID::parse(&data).unwrap();
     /// 
@@ -100,8 +97,7 @@ impl AttributeID {
     /// # Examples
     /// 
     /// ```
-    /// use ancs::attributes::attribute::AttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AttributeID;
     /// let app_identifier = AttributeID::AppIdentifier;
     /// let title = AttributeID::Title;
     /// 
@@ -119,7 +115,7 @@ impl AttributeID {
     }
 }
 
-
+/// The `AppAttributeID` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum AppAttributeID {
     DisplayName = 0,
@@ -132,8 +128,7 @@ impl From<AppAttributeID> for u8 {
     /// 
     /// Convert a `AppAttributeID` to a `u8`:
     /// ```
-    /// use ancs::attributes::attribute::AppAttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AppAttributeID;
     /// let data: u8 = AppAttributeID::DisplayName.into();
     /// 
     /// assert_eq!(0, data);
@@ -153,8 +148,7 @@ impl TryFrom<u8> for AppAttributeID {
     /// # Examples
     /// 
     /// ```
-    /// use ancs::attributes::attribute::AppAttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AppAttributeID;
     /// let attribute: AppAttributeID = AppAttributeID::try_from(0).unwrap();
     /// 
     /// assert_eq!(AppAttributeID::DisplayName, attribute);
@@ -174,8 +168,7 @@ impl AppAttributeID {
     /// # Examples
     /// 
     /// ```
-    /// use ancs::attributes::attribute::AppAttributeID;
-    /// 
+    /// # use ancs::attributes::attribute::AppAttributeID;
     /// let data: [u8; 2] = [0, 1];
     /// let (data, attribute) = AppAttributeID::parse(&data).unwrap();
     /// 
@@ -189,6 +182,7 @@ impl AppAttributeID {
     }
 }
 
+/// The `Attribute` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Attribute {
     pub id: AttributeID, 
@@ -197,6 +191,28 @@ pub struct Attribute {
 }
 
 impl From<Attribute> for Vec<u8> {
+    /// Converts an `Attribute` to its binary represenation
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `Attribute` to a `Vec<u8>`:
+    /// ```
+    /// # use ancs::attributes::attribute::Attribute;
+    /// # use ancs::attributes::attribute::AttributeID;
+    /// # let attribute_id = AttributeID::AppIdentifier;
+    /// # let attribute_data = "test".to_string();
+    /// # let attribute_length = attribute_data.as_bytes().len() as u16;
+    /// let attribute: Attribute = Attribute {
+    ///    id: attribute_id,
+    ///    length: attribute_length,
+    ///    value: Some(attribute_data)
+    /// };
+    /// 
+    /// let converted_bytes: Vec<u8> = attribute.into();
+    /// let expected_bytes: Vec<u8> = vec![0, 4, 0, 116, 101, 115, 116];
+    /// 
+    /// assert_eq!(expected_bytes, converted_bytes);
+    /// ```
     fn from(original: Attribute) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
 
@@ -221,6 +237,28 @@ impl From<Attribute> for Vec<u8> {
 }
 
 impl Attribute {
+    /// Attempts to parse a `Attribute` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `Attribute` to a `Vec<u8>`:
+    /// ```
+    /// # use ancs::attributes::attribute::Attribute;
+    /// # use ancs::attributes::attribute::AttributeID;
+    /// // Attribute Bytes Specificed by ANCS Standard
+    /// let bytes: Vec<u8> = vec![0, 4, 0, 116, 101, 115, 116, 0];
+    /// let (bytes, attribute) = Attribute::parse(&bytes).unwrap();
+    /// 
+    /// // Validate that all bytes were parsed per ANCS Standard
+    /// assert_eq!(attribute.id, AttributeID::AppIdentifier);
+    /// assert_eq!(attribute.length, 4);
+    /// assert_eq!(attribute.value, Some("test".to_string()));
+    /// 
+    /// // Validate all remaining bytes are the same
+    /// assert_eq!(bytes.len(), 1);
+    /// assert_eq!(bytes, [0]);
+    /// ```
+    /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], Attribute> {
         let (i, id) = AttributeID::parse(i)?;
         let (i, length) = le_u16(i)?;
