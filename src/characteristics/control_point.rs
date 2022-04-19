@@ -25,6 +25,25 @@ pub struct GetNotificationAttributesRequest {
 }
 
 impl From<GetNotificationAttributesRequest> for Vec<u8> {
+    /// Converts an `GetNotificationAttributesRequest` to its binary represenation
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `GetNotificationAttributesRequest` to a `Vec<u8>`:
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::attribute::AttributeID;
+    /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
+    /// let notification: GetNotificationAttributesRequest = GetNotificationAttributesRequest {
+    ///    command_id: CommandID::GetNotificationAttributes,
+    ///    notification_uid: 4294967295_u32,
+    ///    attribute_ids: vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))],
+    /// };
+    /// 
+    /// let notification_bytes: Vec<u8> = notification.into();
+    /// let expected_bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
+    /// assert_eq!(notification_bytes, expected_bytes)
+    /// ```
     fn from(original: GetNotificationAttributesRequest) -> Vec<u8> {
         let id = original.command_id as u8;
         let notification_uid: [u8; 4] = original.notification_uid.to_le_bytes();
@@ -56,6 +75,20 @@ impl From<GetNotificationAttributesRequest> for Vec<u8> {
 }
 
 impl GetNotificationAttributesRequest {
+    /// Attempts to convert a `&[u8]` to a valid `GetNotificationAttributesRequest`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::attribute::AttributeID;
+    /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
+    /// let bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
+    /// let notification = GetNotificationAttributesRequest::parse(&bytes).unwrap();
+    ///
+    /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
+    /// assert_eq!(notification.1.notification_uid, 4294967295_u32);
+    /// assert_eq!(notification.1.attribute_ids, vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))]);
+    /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesRequest> {
         let (i, command_id) = le_u8(i)?;
         let (i, notification_uid) = le_u32(i)?;
@@ -92,6 +125,22 @@ pub struct GetAppAttributesRequest {
 }
 
 impl From<GetAppAttributesRequest> for Vec<u8> {
+    ///
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
+    /// let notification: GetAppAttributesRequest = GetAppAttributesRequest {
+    ///     command_id: CommandID::GetNotificationAttributes,
+    ///     app_identifier: "Test".to_string(),
+    ///     attribute_ids: vec![AppAttributeID::DisplayName],
+    /// };
+    ///
+    /// let notification_bytes: Vec<u8> = notification.into();
+    /// let expected_bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
+    ///
+    /// assert_eq!(notification_bytes, expected_bytes)
+    /// ```
     fn from(original: GetAppAttributesRequest) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
 
@@ -122,6 +171,18 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
 }
 
 impl GetAppAttributesRequest {
+    ///
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
+    /// let bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
+    /// let notification = GetAppAttributesRequest::parse(&bytes).unwrap();
+
+    /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
+    /// assert_eq!(notification.1.app_identifier, "Test");
+    /// assert_eq!(notification.1.attribute_ids, vec![AppAttributeID::DisplayName]);
+    /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesRequest> {
         let (i, command_id) = le_u8(i)?;
         let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
