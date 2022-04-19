@@ -2,7 +2,7 @@ pub use crate::attributes::attribute::*;
 pub use crate::attributes::command::*;
 
 use nom::{
-    bytes::complete::{tag,take_until, take_till},
+    bytes::complete::{take_till},
     combinator::{opt, fail},
     number::complete::le_u16,
     combinator::{verify},

@@ -1,10 +1,10 @@
 use nom::{
     multi::count,
-    combinator::peek,
     number::complete::{le_u16, le_u8},
     IResult,
 };
 
+/// The `AttributeID` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum AttributeID {
     AppIdentifier = 0,
@@ -18,6 +18,18 @@ pub enum AttributeID {
 }
 
 impl From<AttributeID> for u8 {
+    /// Converts an `AttributeID` to its binary represenation
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `AttributeID` to a `u8`:
+    /// ```
+    /// use ancs::attributes::attribute::AttributeID;
+    /// 
+    /// let data: u8 = AttributeID::AppIdentifier.into();
+    /// 
+    /// assert_eq!(0, data);
+    /// ```
     fn from(original: AttributeID) -> u8 {
         match original {
             AttributeID::AppIdentifier => 0,
@@ -35,6 +47,18 @@ impl From<AttributeID> for u8 {
 impl TryFrom<u8> for AttributeID {
     type Error = ();
 
+    /// Attempts to convert a u8 to a valid `AttributeID`
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use ancs::attributes::attribute::AttributeID;
+    /// 
+    /// let attribute: AttributeID = AttributeID::try_from(0).unwrap();
+    /// 
+    /// assert_eq!(AttributeID::AppIdentifier, attribute);
+    /// ```
+    /// 
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(AttributeID::AppIdentifier),
@@ -51,12 +75,40 @@ impl TryFrom<u8> for AttributeID {
 }
 
 impl AttributeID {
+    /// Attempts to parse a AttributeID from a `&[u8]`
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use ancs::attributes::attribute::AttributeID;
+    /// 
+    /// let data: [u8; 2] = [0, 1];
+    /// let (data, attribute) = AttributeID::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(AttributeID::AppIdentifier, attribute);
+    /// ```
+    /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], AttributeID> {
         let (i, attribute_id) = le_u8(i)?;
 
         Ok((i, AttributeID::try_from(attribute_id).unwrap()))
     }
 
+    /// Determines if an AttributeID should have a size associated
+    /// based on what's outlined in the ANCS specification.
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use ancs::attributes::attribute::AttributeID;
+    /// 
+    /// let app_identifier = AttributeID::AppIdentifier;
+    /// let title = AttributeID::Title;
+    /// 
+    /// assert_eq!(AttributeID::is_sized(app_identifier), false);
+    /// assert_eq!(AttributeID::is_sized(title), true);
+    /// ```
+    /// 
     pub fn is_sized(id: AttributeID) -> bool {
         match id {
             AttributeID::Title => true,
@@ -74,6 +126,18 @@ pub enum AppAttributeID {
 }
 
 impl From<AppAttributeID> for u8 {
+    /// Converts an `AppAttributeID` to its binary represenation
+    /// 
+    /// # Examples
+    /// 
+    /// Convert a `AppAttributeID` to a `u8`:
+    /// ```
+    /// use ancs::attributes::attribute::AppAttributeID;
+    /// 
+    /// let data: u8 = AppAttributeID::DisplayName.into();
+    /// 
+    /// assert_eq!(0, data);
+    /// ```
     fn from(original: AppAttributeID) -> u8 {
         match original {
             AppAttributeID::DisplayName => 0,
@@ -84,6 +148,18 @@ impl From<AppAttributeID> for u8 {
 impl TryFrom<u8> for AppAttributeID {
     type Error = ();
 
+    /// Attempts to convert a u8 to a valid `AppAttributeID`
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use ancs::attributes::attribute::AppAttributeID;
+    /// 
+    /// let attribute: AppAttributeID = AppAttributeID::try_from(0).unwrap();
+    /// 
+    /// assert_eq!(AppAttributeID::DisplayName, attribute);
+    /// ```
+    /// 
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(AppAttributeID::DisplayName),
@@ -93,6 +169,19 @@ impl TryFrom<u8> for AppAttributeID {
 }
 
 impl AppAttributeID {
+    /// Attempts to parse a `AppAttributeID` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// 
+    /// ```
+    /// use ancs::attributes::attribute::AppAttributeID;
+    /// 
+    /// let data: [u8; 2] = [0, 1];
+    /// let (data, attribute) = AppAttributeID::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(AppAttributeID::DisplayName, attribute);
+    /// ```
+    /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], AppAttributeID> {
         let (i, attribute_id) = le_u8(i)?;
 
