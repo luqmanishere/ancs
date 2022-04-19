@@ -1,11 +1,19 @@
 [package]
 name = "ancs"
 version = "0.1.0"
+authors = ["Ian Armour <ianmarmour@gmail.com>"]
+description = """
+A set of types for representing Apple Notification Center Service requests and responses.
+"""
 edition = "2021"
+readme = "README.md"
+repository = "https://github.com/ianmarmour/ancs"
+license = "MIT"
+keywords = ["apple", "ancs", "notification", "bluetooth", "btle"]
+categories = ["encoding", "network-programming"]
 
 [lib]
 path = "src/lib.rs"
 
 [dependencies]
 nom = "7.1.1"
-byteorder = "1.4.3"
