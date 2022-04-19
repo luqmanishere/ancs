@@ -2,6 +2,7 @@
 [![crates.io](https://img.shields.io/crates/v/ancs.svg)](https://crates.io/crates/ancs)
 [![Released API docs](https://docs.rs/ancs/badge.svg)](https://docs.rs/ancs)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![CI](https://github.com/ianmarmour/ancs/workflows/CI/badge.svg)](https://github.com/ianmarmour/ancs/actions/workflows/CI)
 
 An Apple Notification Control Service protocol library for Rust, with minimal dependencies.
 
