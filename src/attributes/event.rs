@@ -6,6 +6,15 @@ pub enum EventID {
 }
 
 impl From<EventID> for u8 {
+    /// Converts a `EventID` to a `u8` representaiton
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventID;
+    /// let data: u8 = EventID::NotificationAdded.into();
+    /// 
+    /// assert_eq!(0, data);
+    /// ```
     fn from(original: EventID) -> u8 {
         match original {
             EventID::NotificationAdded => 0,
@@ -17,7 +26,15 @@ impl From<EventID> for u8 {
 
 impl TryFrom<u8> for EventID {
     type Error = ();
-
+    /// Attempts to convert a `u8` to a valid `EventID`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventID;
+    /// let command: EventID = EventID::try_from(0).unwrap();
+    /// 
+    /// assert_eq!(EventID::NotificationAdded, command);
+    /// ```
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(EventID::NotificationAdded),
@@ -38,6 +55,15 @@ pub enum EventFlag {
 }
 
 impl From<EventFlag> for u8 {
+    /// Converts a `EventFlag` to a `u8` representaiton
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventFlag;
+    /// let data: u8 = EventFlag::Silent.into();
+    /// 
+    /// assert_eq!(0b00000001, data);
+    /// ```
     fn from(original: EventFlag) -> u8 {
         match original {
             EventFlag::Silent => 0b00000001,
@@ -52,6 +78,15 @@ impl From<EventFlag> for u8 {
 impl TryFrom<u8> for EventFlag {
     type Error = ();
 
+    /// Attempts to convert a `u8` to a valid `EventFlag`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventFlag;
+    /// let command: EventFlag = EventFlag::try_from(0b00000001).unwrap();
+    /// 
+    /// assert_eq!(EventFlag::Silent, command);
+    /// ```
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original.trailing_zeros() {
             0 => Ok(EventFlag::Silent),
