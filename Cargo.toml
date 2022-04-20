@@ -1,6 +1,6 @@
 [package]
 name = "ancs"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ian Armour <ianmarmour@gmail.com>"]
 description = """
 A set of types for representing Apple Notification Center Service requests and responses.
