@@ -15,6 +15,32 @@ pub struct GattNotification {
 }
 
 impl GattNotification {
+    /// Attempts to parse a `GattNotification` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::category::CategoryID;
+    /// # use ancs::attributes::event::EventFlag;
+    /// # use ancs::attributes::event::EventID;
+    /// # use ancs::characteristics::notification_source::GattNotification;
+    /// let notification: GattNotification = GattNotification {
+    ///     event_id: EventID::NotificationAdded,
+    ///     event_flags: EventFlag::Silent,
+    ///     category_id: CategoryID::Other,
+    ///     category_count: 0,
+    ///     notification_uid: 4294967295_u32,
+    /// };
+    ///
+    /// let notification_bytes: [u8; 8] = notification.into();
+    ///
+    /// let parsed_notification = GattNotification::parse(&notification_bytes).unwrap().1;
+    /// 
+    /// assert_eq!(parsed_notification.event_id, EventID::NotificationAdded);
+    /// assert_eq!(parsed_notification.event_flags, EventFlag::Silent);
+    /// assert_eq!(parsed_notification.category_id, CategoryID::Other);
+    /// assert_eq!(parsed_notification.category_count, 0);
+    /// assert_eq!(parsed_notification.notification_uid, 4294967295_u32);
+    /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GattNotification> {
         let (i, event_id) = le_u8(i)?;
         let (i, event_flags) = le_u8(i)?;
@@ -36,6 +62,28 @@ impl GattNotification {
 }
 
 impl From<GattNotification> for [u8; 8] {
+    /// Converts a `GattNotification` to a `[u8; 8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::category::CategoryID;
+    /// # use ancs::attributes::event::EventFlag;
+    /// # use ancs::attributes::event::EventID;
+    /// # use ancs::characteristics::notification_source::GattNotification;
+    /// let notification: GattNotification = GattNotification {
+    ///    event_id: EventID::NotificationAdded,
+    ///    event_flags: EventFlag::Silent,
+    ///    category_id: CategoryID::Other,
+    ///    category_count: 0,
+    ///    notification_uid: 4294967295_u32,
+    ///};
+    ///
+    ///let notification_bytes: [u8; 8] = notification.into();
+    ///let expected_bytes: [u8; 8] = [0, 1, 0, 0, 255, 255, 255, 255];
+    ///
+    ///assert_eq!(notification_bytes, expected_bytes)
+    /// ```
+
     fn from(original: GattNotification) -> [u8; 8] {
         let mut bytes: [u8; 8] = [0; 8];
         let uid_as_u8 = original.notification_uid.to_le_bytes();
