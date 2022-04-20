@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod get_notification_attributes_response {
     use ancs::attributes::command::CommandID;
-    use ancs::attributes::attribute::{Attribute, AttributeID};
+    use ancs::attributes::Attribute;
+    use ancs::attributes::notification::NotificationAttributeID;
     use ancs::characteristics::data_source::GetNotificationAttributesResponse;
 
     #[test]
@@ -11,7 +12,7 @@ mod get_notification_attributes_response {
             notification_uid: 4294967295_u32,
             attribute_list: vec![
                 Attribute { 
-                    id: AttributeID::AppIdentifier, 
+                    id: NotificationAttributeID::AppIdentifier, 
                     length: "com.rust.test".to_string().as_bytes().len() as u16, 
                     value: Some("com.rust.test".to_string()) 
                 }
@@ -33,7 +34,7 @@ mod get_notification_attributes_response {
         assert_eq!(notification.1.notification_uid, 4294967295_u32);
         assert_eq!(notification.1.attribute_list, vec![
             Attribute { 
-                id: AttributeID::AppIdentifier, 
+                id: NotificationAttributeID::AppIdentifier, 
                 length: "com.rust.test".to_string().as_bytes().len() as u16, 
                 value: Some("com.rust.test".to_string()) 
             }

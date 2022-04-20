@@ -52,7 +52,7 @@ impl TryFrom<u8> for CategoryID {
     /// # Examples
     /// 
     /// ```
-    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// # use ancs::attributes::app::AppAttributeID;
     /// let attribute: AppAttributeID = AppAttributeID::try_from(0).unwrap();
     /// 
     /// assert_eq!(AppAttributeID::DisplayName, attribute);

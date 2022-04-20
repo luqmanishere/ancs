@@ -1,4 +1,4 @@
-pub use crate::attributes::attribute::*;
+pub use crate::attributes::Attribute;
 pub use crate::attributes::command::*;
 
 use nom::{

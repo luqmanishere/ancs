@@ -1,4 +1,6 @@
-pub use crate::attributes::attribute::*;
+use crate::attributes::app::AppAttributeID;
+pub use crate::attributes::notification::NotificationAttributeID;
+pub use crate::attributes::notification::*;
 pub use crate::attributes::command::*;
 
 use nom::{
@@ -21,7 +23,7 @@ pub struct GetNotificationAttributesRequest {
     // Rust doesn't have a clean way to express variadic tuples, and Apple has decided that some attributes need a max_length
     // assigned. To ensure that users can serialize requests without losing data we're left with this terrible solution of 
     // having users optionally provide a length or not I can't come up with a good name for a structure here so we're left with this.
-    pub attribute_ids: Vec<(AttributeID, Option<u16>)>,
+    pub attribute_ids: Vec<(NotificationAttributeID, Option<u16>)>,
 }
 
 impl From<GetNotificationAttributesRequest> for Vec<u8> {
@@ -32,12 +34,12 @@ impl From<GetNotificationAttributesRequest> for Vec<u8> {
     /// Convert a `GetNotificationAttributesRequest` to a `Vec<u8>`:
     /// ```
     /// # use ancs::attributes::command::CommandID;
-    /// # use ancs::attributes::attribute::AttributeID;
+    /// # use ancs::attributes::notification::NotificationAttributeID;
     /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
     /// let notification: GetNotificationAttributesRequest = GetNotificationAttributesRequest {
     ///    command_id: CommandID::GetNotificationAttributes,
     ///    notification_uid: 4294967295_u32,
-    ///    attribute_ids: vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))],
+    ///    attribute_ids: vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))],
     /// };
     /// 
     /// let notification_bytes: Vec<u8> = notification.into();
@@ -80,14 +82,14 @@ impl GetNotificationAttributesRequest {
     /// # Examples
     /// ```
     /// # use ancs::attributes::command::CommandID;
-    /// # use ancs::attributes::attribute::AttributeID;
+    /// # use ancs::attributes::notification::NotificationAttributeID;
     /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
     /// let bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
     /// let notification = GetNotificationAttributesRequest::parse(&bytes).unwrap();
     ///
     /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
     /// assert_eq!(notification.1.notification_uid, 4294967295_u32);
-    /// assert_eq!(notification.1.attribute_ids, vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))]);
+    /// assert_eq!(notification.1.attribute_ids, vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesRequest> {
         let (i, command_id) = le_u8(i)?;
@@ -95,11 +97,11 @@ impl GetNotificationAttributesRequest {
         let (i, attribute_ids) = many0(
             alt((
                 pair(
-                    verify(AttributeID::parse, |&id| AttributeID::is_sized(id)),
+                    verify(NotificationAttributeID::parse, |&id| NotificationAttributeID::is_sized(id)),
                     opt(le_u16),
                 ),
                 pair(
-                    verify(AttributeID::parse, |&id| !AttributeID::is_sized(id)),
+                    verify(NotificationAttributeID::parse, |&id| !NotificationAttributeID::is_sized(id)),
                     opt(fail),
                 ),
             ))
@@ -128,7 +130,7 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
     ///
     /// ```
     /// # use ancs::attributes::command::CommandID;
-    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// # use ancs::attributes::app::AppAttributeID;
     /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
     /// let notification: GetAppAttributesRequest = GetAppAttributesRequest {
     ///     command_id: CommandID::GetNotificationAttributes,
@@ -174,7 +176,7 @@ impl GetAppAttributesRequest {
     ///
     /// ```
     /// # use ancs::attributes::command::CommandID;
-    /// # use ancs::attributes::attribute::AppAttributeID;
+    /// # use ancs::attributes::app::AppAttributeID;
     /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
     /// let bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
     /// let notification = GetAppAttributesRequest::parse(&bytes).unwrap();

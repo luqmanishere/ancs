@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod get_notification_attributes_request {
     use ancs::attributes::command::CommandID;
-    use ancs::attributes::attribute::AttributeID;
+    use ancs::attributes::notification::NotificationAttributeID;
     use ancs::characteristics::control_point::GetNotificationAttributesRequest;
 
     #[test]
@@ -9,7 +9,7 @@ mod get_notification_attributes_request {
         let notification: GetNotificationAttributesRequest = GetNotificationAttributesRequest {
             command_id: CommandID::GetNotificationAttributes,
             notification_uid: 4294967295_u32,
-            attribute_ids: vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))],
+            attribute_ids: vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))],
         };
 
         let notification_bytes: Vec<u8> = notification.into();
@@ -25,14 +25,14 @@ mod get_notification_attributes_request {
 
         assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
         assert_eq!(notification.1.notification_uid, 4294967295_u32);
-        assert_eq!(notification.1.attribute_ids, vec![(AttributeID::AppIdentifier, None), (AttributeID::Title, Some(u16::MAX))]);
+        assert_eq!(notification.1.attribute_ids, vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))]);
     }
 }
 
 #[cfg(test)]
 mod get_app_attributes_request {
     use ancs::attributes::command::CommandID;
-    use ancs::attributes::attribute::AppAttributeID;
+    use ancs::attributes::app::AppAttributeID;
     use ancs::characteristics::control_point::GetAppAttributesRequest;
 
     #[test]
