@@ -19,7 +19,7 @@ use std::fmt::Debug;
 
 use self::{notification::NotificationAttributeID, app::AppAttributeID};
 
-/// The `Attribute` type. See [the module level documentation](index.html) for more.
+/// The `NotificationAttribute` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone)]
 pub struct NotificationAttribute {
     pub id: NotificationAttributeID, 
@@ -28,7 +28,7 @@ pub struct NotificationAttribute {
 }
 
 impl From<NotificationAttribute> for Vec<u8> {
-    /// Converts a `Attribute` to a `Vec<u8>`:
+    /// Converts a `NotificationAttribute` to a `Vec<u8>`:
     /// 
     /// # Examples
     /// ```
@@ -77,11 +77,11 @@ impl From<NotificationAttribute> for Vec<u8> {
 }
 
 impl NotificationAttribute {
-    /// Attempts to parse a `Attribute` from a `&[u8]`
+    /// Attempts to parse a `NotificationAttribute` from a `&[u8]`
     /// 
     /// # Examples
     /// 
-    /// Convert a `Attribute` to a `Vec<u8>`:
+    /// Convert a `NotificationAttribute` to a `Vec<u8>`:
     /// ```
     /// # use ancs::attributes::NotificationAttribute;
     /// # use ancs::attributes::notification::NotificationAttributeID;
@@ -115,7 +115,7 @@ impl NotificationAttribute {
     }
 }
 
-/// The `Attribute` type. See [the module level documentation](index.html) for more.
+/// The `AppAttribute` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone)]
 pub struct AppAttribute {
     pub id: AppAttributeID, 
@@ -124,7 +124,7 @@ pub struct AppAttribute {
 }
 
 impl From<AppAttribute> for Vec<u8> {
-    /// Converts a `Attribute` to a `Vec<u8>`:
+    /// Converts a `AppAttribute` to a `Vec<u8>`:
     /// 
     /// # Examples
     /// ```
@@ -173,11 +173,11 @@ impl From<AppAttribute> for Vec<u8> {
 }
 
 impl AppAttribute {
-    /// Attempts to parse a `Attribute` from a `&[u8]`
+    /// Attempts to parse a `AppAttribute` from a `&[u8]`
     /// 
     /// # Examples
     /// 
-    /// Convert a `Attribute` to a `Vec<u8>`:
+    /// Convert a `AppAttribute` to a `Vec<u8>`:
     /// ```
     /// # use ancs::attributes::AppAttribute;
     /// # use ancs::attributes::app::AppAttributeID;
