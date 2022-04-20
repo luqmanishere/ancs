@@ -1,4 +1,4 @@
-use crate::attributes::app::AppAttributeID;
+pub use crate::attributes::app::AppAttributeID;
 pub use crate::attributes::notification::NotificationAttributeID;
 pub use crate::attributes::notification::*;
 pub use crate::attributes::command::*;
@@ -27,11 +27,9 @@ pub struct GetNotificationAttributesRequest {
 }
 
 impl From<GetNotificationAttributesRequest> for Vec<u8> {
-    /// Converts an `GetNotificationAttributesRequest` to its binary represenation
+    /// Converts a `GetNotificationAttributesRequest` to a `Vec<u8>`
     /// 
     /// # Examples
-    /// 
-    /// Convert a `GetNotificationAttributesRequest` to a `Vec<u8>`:
     /// ```
     /// # use ancs::attributes::command::CommandID;
     /// # use ancs::attributes::notification::NotificationAttributeID;
@@ -42,9 +40,10 @@ impl From<GetNotificationAttributesRequest> for Vec<u8> {
     ///    attribute_ids: vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))],
     /// };
     /// 
-    /// let notification_bytes: Vec<u8> = notification.into();
-    /// let expected_bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
-    /// assert_eq!(notification_bytes, expected_bytes)
+    /// let data: Vec<u8> = notification.into();
+    /// let expected_data: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
+    /// 
+    /// assert_eq!(data, expected_data)
     /// ```
     fn from(original: GetNotificationAttributesRequest) -> Vec<u8> {
         let id = original.command_id as u8;
@@ -77,19 +76,19 @@ impl From<GetNotificationAttributesRequest> for Vec<u8> {
 }
 
 impl GetNotificationAttributesRequest {
-    /// Attempts to convert a `&[u8]` to a valid `GetNotificationAttributesRequest`
+    /// Attempts to parse a `GetNotificationAttributesRequest` from a `&[u8]`
     /// 
     /// # Examples
     /// ```
     /// # use ancs::attributes::command::CommandID;
     /// # use ancs::attributes::notification::NotificationAttributeID;
     /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
-    /// let bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
-    /// let notification = GetNotificationAttributesRequest::parse(&bytes).unwrap();
+    /// let data: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
+    /// let (data, notification) = GetNotificationAttributesRequest::parse(&data).unwrap();
     ///
-    /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
-    /// assert_eq!(notification.1.notification_uid, 4294967295_u32);
-    /// assert_eq!(notification.1.attribute_ids, vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))]);
+    /// assert_eq!(notification.command_id, CommandID::GetNotificationAttributes);
+    /// assert_eq!(notification.notification_uid, 4294967295_u32);
+    /// assert_eq!(notification.attribute_ids, vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesRequest> {
         let (i, command_id) = le_u8(i)?;
@@ -127,21 +126,23 @@ pub struct GetAppAttributesRequest {
 }
 
 impl From<GetAppAttributesRequest> for Vec<u8> {
-    ///
+    /// Converts a `GetAppAttributesRequest` to a `Vec<u8>`
+    /// 
+    /// # Examples
     /// ```
     /// # use ancs::attributes::command::CommandID;
     /// # use ancs::attributes::app::AppAttributeID;
     /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
     /// let notification: GetAppAttributesRequest = GetAppAttributesRequest {
     ///     command_id: CommandID::GetNotificationAttributes,
-    ///     app_identifier: "Test".to_string(),
+    ///     app_identifier: "com.apple.test".to_string(),
     ///     attribute_ids: vec![AppAttributeID::DisplayName],
     /// };
     ///
-    /// let notification_bytes: Vec<u8> = notification.into();
-    /// let expected_bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
+    /// let data: Vec<u8> = notification.into();
+    /// let expected_data: Vec<u8> = vec![0, 99, 111, 109, 46, 97, 112, 112, 108, 101, 46, 116, 101, 115, 116, 0, 0];
     ///
-    /// assert_eq!(notification_bytes, expected_bytes)
+    /// assert_eq!(data, expected_data)
     /// ```
     fn from(original: GetAppAttributesRequest) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
@@ -173,17 +174,19 @@ impl From<GetAppAttributesRequest> for Vec<u8> {
 }
 
 impl GetAppAttributesRequest {
-    ///
+    /// Attempts to parse a `GetAppAttributesRequest` from a `&[u8]`
+    /// 
+    /// # Examples
     /// ```
     /// # use ancs::attributes::command::CommandID;
     /// # use ancs::attributes::app::AppAttributeID;
     /// # use ancs::characteristics::control_point::GetAppAttributesRequest;
-    /// let bytes: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
-    /// let notification = GetAppAttributesRequest::parse(&bytes).unwrap();
-
-    /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
-    /// assert_eq!(notification.1.app_identifier, "Test");
-    /// assert_eq!(notification.1.attribute_ids, vec![AppAttributeID::DisplayName]);
+    /// let data: Vec<u8> = vec![0, 84, 101, 115, 116, 0, 0];
+    /// let (data, notification) = GetAppAttributesRequest::parse(&data).unwrap();
+    ///
+    /// assert_eq!(notification.command_id, CommandID::GetNotificationAttributes);
+    /// assert_eq!(notification.app_identifier, "Test");
+    /// assert_eq!(notification.attribute_ids, vec![AppAttributeID::DisplayName]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesRequest> {
         let (i, command_id) = le_u8(i)?;

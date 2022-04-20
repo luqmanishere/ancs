@@ -1,4 +1,5 @@
-pub use crate::attributes::Attribute;
+use crate::attributes::AppAttribute;
+pub use crate::attributes::NotificationAttribute;
 pub use crate::attributes::command::*;
 
 use nom::{
@@ -14,10 +15,35 @@ pub const DATA_SOURCE_UUID: &str = "22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB";
 pub struct GetNotificationAttributesResponse {
     pub command_id: CommandID,
     pub notification_uid: u32,
-    pub attribute_list: Vec<Attribute>,
+    pub attribute_list: Vec<NotificationAttribute>,
 }
 
 impl From<GetNotificationAttributesResponse> for Vec<u8> {
+    /// Converts a `GetNotificationAttributesResponse` to a `Vec<u8>`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::NotificationAttribute;
+    /// # use ancs::attributes::notification::NotificationAttributeID;
+    /// # use ancs::characteristics::data_source::GetNotificationAttributesResponse;
+    /// let notification: GetNotificationAttributesResponse = GetNotificationAttributesResponse {
+    ///     command_id: CommandID::GetNotificationAttributes,
+    ///     notification_uid: 4294967295_u32,
+    ///     attribute_list: vec![
+    ///         NotificationAttribute { 
+    ///             id: NotificationAttributeID::AppIdentifier, 
+    ///             length: "com.rust.test".to_string().as_bytes().len() as u16, 
+    ///             value: Some("com.rust.test".to_string()) 
+    ///         }
+    ///     ],
+    /// };
+    ///
+    /// let data: Vec<u8> = notification.into();
+    /// let expected_data: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 13, 0, 99, 111, 109, 46, 114, 117, 115, 116, 46, 116, 101, 115, 116];
+    /// 
+    /// assert_eq!(data, expected_data)
+    /// ```
     fn from(original: GetNotificationAttributesResponse) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
 
@@ -41,10 +67,31 @@ impl From<GetNotificationAttributesResponse> for Vec<u8> {
 }
 
 impl GetNotificationAttributesResponse {
+    /// Attempts to parse a `GetNotificationAttributesResponse` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::NotificationAttribute;
+    /// # use ancs::attributes::notification::NotificationAttributeID;
+    /// # use ancs::characteristics::data_source::GetNotificationAttributesResponse;
+    /// let bytes: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 13, 0, 99, 111, 109, 46, 114, 117, 115, 116, 46, 116, 101, 115, 116];
+    /// let notification = GetNotificationAttributesResponse::parse(&bytes).unwrap();
+    ///
+    /// assert_eq!(notification.1.command_id, CommandID::GetNotificationAttributes);
+    /// assert_eq!(notification.1.notification_uid, 4294967295_u32);
+    /// assert_eq!(notification.1.attribute_list, vec![
+    ///    NotificationAttribute { 
+    ///        id: NotificationAttributeID::AppIdentifier, 
+    ///        length: "com.rust.test".to_string().as_bytes().len() as u16, 
+    ///        value: Some("com.rust.test".to_string()) 
+    ///    }
+    /// ]);
+    /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = le_u8(i)?;
         let (i, notification_uid) = le_u32(i)?;
-        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+        let (i, attribute_list) = many0(NotificationAttribute::parse)(i)?;
 
         Ok((
             i,
@@ -61,7 +108,7 @@ impl GetNotificationAttributesResponse {
 pub struct GetAppAttributesResponse {
     command_id: CommandID,
     app_identifier: String,
-    attribute_list: Vec<Attribute>,
+    attribute_list: Vec<AppAttribute>,
 }
 
 impl From<GetAppAttributesResponse> for Vec<u8> {
@@ -100,7 +147,7 @@ impl GetAppAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
         let (i, command_id) = le_u8(i)?;
         let (i, app_identifier) = take_until(" ")(i)?;
-        let (i, attribute_list) = many0(Attribute::parse)(i)?;
+        let (i, attribute_list) = many0(AppAttribute::parse)(i)?;
 
         Ok((
             i,
