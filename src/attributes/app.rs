@@ -1,7 +1,9 @@
 use nom::{
     number::complete::{le_u8},
+    error::{ErrorKind, ParseError},
     IResult,
 };
+
 
 /// The `AppAttributeID` type. See [the module level documentation](index.html) for more.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -29,7 +31,7 @@ impl From<AppAttributeID> for u8 {
 }
 
 impl TryFrom<u8> for AppAttributeID {
-    type Error = ();
+    type Error = AttributeIDError;
 
     /// Attempts to convert a `u8` to a valid `AppAttributeID`
     /// 
@@ -44,7 +46,7 @@ impl TryFrom<u8> for AppAttributeID {
     fn try_from(original: u8) -> Result<Self, Self::Error> {
         match original {
             0 => Ok(AppAttributeID::DisplayName),
-            _ => Err(()),
+            _ => Err(AttributeIDError)
         }
     }
 }
@@ -64,6 +66,12 @@ impl AppAttributeID {
     pub fn parse(i: &[u8]) -> IResult<&[u8], AppAttributeID> {
         let (i, app_attribute_id) = le_u8(i)?;
 
-        Ok((i, AppAttributeID::try_from(app_attribute_id).unwrap()))
+        match AppAttributeID::try_from(app_attribute_id) {
+            Ok(app_attribute_id) => { Ok((i, app_attribute_id)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        } 
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct AttributeIDError;
