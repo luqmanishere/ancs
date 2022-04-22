@@ -76,15 +76,15 @@ impl NotificationAttributeID {
     /// ```
     /// # use ancs::attributes::notification::NotificationAttributeID;
     /// let data: [u8; 2] = [0, 1];
-    /// let (data, attribute) = NotificationAttributeID::parse(&data).unwrap();
+    /// let (data, notification_attribute_id) = NotificationAttributeID::parse(&data).unwrap();
     /// 
-    /// assert_eq!(NotificationAttributeID::AppIdentifier, attribute);
+    /// assert_eq!(NotificationAttributeID::AppIdentifier, notification_attribute_id);
     /// ```
     /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], NotificationAttributeID> {
-        let (i, attribute_id) = le_u8(i)?;
+        let (i, notification_attribute_id) = le_u8(i)?;
 
-        Ok((i, NotificationAttributeID::try_from(attribute_id).unwrap()))
+        Ok((i, NotificationAttributeID::try_from(notification_attribute_id).unwrap()))
     }
 
     /// Determines if a `NotificationAttributeID` has a size based

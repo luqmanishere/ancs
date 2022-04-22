@@ -42,18 +42,18 @@ impl Notification {
     /// assert_eq!(parsed_notification.notification_uid, 4294967295_u32);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], Notification> {
-        let (i, event_id) = le_u8(i)?;
-        let (i, event_flags) = le_u8(i)?;
-        let (i, category_id) = le_u8(i)?;
+        let (i, event_id) = EventID::parse(i)?;
+        let (i, event_flags) = EventFlag::parse(i)?;
+        let (i, category_id) = CategoryID::parse(i)?;
         let (i, category_count) = le_u8(i)?;
         let (i, notification_uid) = count(le_u8, 4)(i)?;
 
         Ok((
             i,
             Notification {
-                event_id: EventID::try_from(event_id).unwrap(),
-                event_flags: EventFlag::try_from(event_flags).unwrap(),
-                category_id: CategoryID::try_from(category_id).unwrap(),
+                event_id: event_id,
+                event_flags: event_flags,
+                category_id: category_id,
                 category_count,
                 notification_uid: u32::from_le_bytes(notification_uid.try_into().unwrap()),
             },

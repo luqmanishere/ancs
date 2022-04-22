@@ -1,3 +1,8 @@
+use nom::{
+    number::complete::{le_u8},
+    IResult,
+};
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CategoryID {
     Other = 0,
@@ -76,3 +81,23 @@ impl TryFrom<u8> for CategoryID {
         }
     }
 }
+
+impl CategoryID {
+    /// Attempts to parse a `CategoryID` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::category::CategoryID;
+    /// let data: [u8; 2] = [0, 1];
+    /// let (data, category_id) = CategoryID::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(CategoryID::Other, category_id);
+    /// ```
+    /// 
+    pub fn parse(i: &[u8]) -> IResult<&[u8], CategoryID> {
+        let (i, category_id) = le_u8(i)?;
+
+        Ok((i, CategoryID::try_from(category_id).unwrap()))
+    }
+}
+

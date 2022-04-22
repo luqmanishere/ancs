@@ -3,9 +3,10 @@ pub use crate::attributes::NotificationAttribute;
 pub use crate::attributes::command::*;
 
 use nom::{
-    bytes::complete::take_until,
+    bytes::complete::take_till,
     multi::{many0},
     number::complete::{le_u8, le_u32},
+    sequence::{terminated},
     IResult,
 };
 
@@ -89,14 +90,14 @@ impl GetNotificationAttributesResponse {
     /// ]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
-        let (i, command_id) = le_u8(i)?;
+        let (i, command_id) = CommandID::parse(i)?;
         let (i, notification_uid) = le_u32(i)?;
         let (i, attribute_list) = many0(NotificationAttribute::parse)(i)?;
 
         Ok((
             i,
             GetNotificationAttributesResponse {
-                command_id: CommandID::try_from(command_id).unwrap(),
+                command_id: command_id,
                 notification_uid: notification_uid,
                 attribute_list: attribute_list,
             },
@@ -106,15 +107,65 @@ impl GetNotificationAttributesResponse {
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct GetAppAttributesResponse {
-    command_id: CommandID,
-    app_identifier: String,
-    attribute_list: Vec<AppAttribute>,
+    pub command_id: CommandID,
+    pub app_identifier: String,
+    pub attribute_list: Vec<AppAttribute>,
 }
 
 impl From<GetAppAttributesResponse> for Vec<u8> {
+    /// Converts a `GetAppAttributesResponse` to a `Vec<u8>`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::AppAttribute;
+    /// # use ancs::attributes::app::AppAttributeID;
+    /// # use ancs::characteristics::data_source::GetAppAttributesResponse;
+    /// 
+    /// let response: GetAppAttributesResponse = GetAppAttributesResponse {
+    ///     command_id: CommandID::GetAppAttributes,
+    ///     app_identifier: "com.apple.test".to_string(),
+    ///     attribute_list: vec![
+    ///         AppAttribute { 
+    ///             id: AppAttributeID::DisplayName, 
+    ///             length: "Test".to_string().as_bytes().len() as u16, 
+    ///             value: Some("Test".to_string()) 
+    ///         }
+    ///     ],
+    /// };
+    ///
+    /// let expected_data: Vec<u8> = vec![
+    ///     1,
+    ///     99,
+    ///     111, 
+    ///     109, 
+    ///     46,
+    ///     97,
+    ///     112,
+    ///     112, 
+    ///     108, 
+    ///     101,
+    ///     46,
+    ///     116,
+    ///     101,
+    ///     115,
+    ///     116,
+    ///     0,
+    ///     0,
+    ///     4,
+    ///     0,
+    ///     84,
+    ///     101,
+    ///     115,
+    ///     116
+    /// ];
+    /// let data: Vec<u8> = response.into();
+    /// 
+    /// assert_eq!(data, expected_data)
+    /// ```
     fn from(original: GetAppAttributesResponse) -> Vec<u8> {
         let mut vec: Vec<u8> = Vec::new();
-
+        
         // Convert all attributes to bytes
         let command_id: u8 = original.command_id.into();
         let mut app_identifier: Vec<u8> = original.app_identifier.as_bytes().to_vec();
@@ -144,15 +195,62 @@ impl From<GetAppAttributesResponse> for Vec<u8> {
 }
 
 impl GetAppAttributesResponse {
+    /// Attempts to parse a `GetAppAttributesResponse` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::AppAttribute;
+    /// # use ancs::attributes::app::AppAttributeID;
+    /// # use ancs::characteristics::data_source::GetAppAttributesResponse;
+    /// 
+    /// let data: Vec<u8> = vec![
+    ///     1,
+    ///     99,
+    ///     111, 
+    ///     109, 
+    ///     46,
+    ///     97,
+    ///     112,
+    ///     112, 
+    ///     108, 
+    ///     101,
+    ///     46,
+    ///     116,
+    ///     101,
+    ///     115,
+    ///     116,
+    ///     0,
+    ///     0,
+    ///     4,
+    ///     0,
+    ///     84,
+    ///     101,
+    ///     115,
+    ///     116
+    /// ];
+    /// 
+    /// let (data, response) = GetAppAttributesResponse::parse(&data).unwrap();
+    ///
+    /// assert_eq!(response.command_id, CommandID::GetAppAttributes);
+    /// assert_eq!(response.app_identifier, "com.apple.test");
+    /// assert_eq!(response.attribute_list, vec![
+    ///    AppAttribute { 
+    ///        id: AppAttributeID::DisplayName, 
+    ///        length: "Test".to_string().as_bytes().len() as u16, 
+    ///        value: Some("Test".to_string()) 
+    ///    }
+    /// ]);
+    /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
-        let (i, command_id) = le_u8(i)?;
-        let (i, app_identifier) = take_until(" ")(i)?;
+        let (i, command_id) = CommandID::parse(i)?;
+        let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
         let (i, attribute_list) = many0(AppAttribute::parse)(i)?;
 
         Ok((
             i,
             GetAppAttributesResponse {
-                command_id: CommandID::try_from(command_id).unwrap(),
+                command_id: command_id,
                 app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(),
                 attribute_list: attribute_list,
             },

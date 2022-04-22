@@ -83,7 +83,17 @@ impl GetNotificationAttributesRequest {
     /// # use ancs::attributes::command::CommandID;
     /// # use ancs::attributes::notification::NotificationAttributeID;
     /// # use ancs::characteristics::control_point::GetNotificationAttributesRequest;
-    /// let data: Vec<u8> = vec![0, 255, 255, 255, 255, 0, 1, 255, 255];
+    /// let data: Vec<u8> = vec![
+    ///     0, 
+    ///     255,
+    ///     255, 
+    ///     255, 
+    ///     255, 
+    ///     0, 
+    ///     1, 
+    ///     255, 
+    ///     255
+    /// ];
     /// let (data, notification) = GetNotificationAttributesRequest::parse(&data).unwrap();
     ///
     /// assert_eq!(notification.command_id, CommandID::GetNotificationAttributes);
@@ -91,7 +101,7 @@ impl GetNotificationAttributesRequest {
     /// assert_eq!(notification.attribute_ids, vec![(NotificationAttributeID::AppIdentifier, None), (NotificationAttributeID::Title, Some(u16::MAX))]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesRequest> {
-        let (i, command_id) = le_u8(i)?;
+        let (i, command_id) = CommandID::parse(i)?;
         let (i, notification_uid) = le_u32(i)?;
         let (i, attribute_ids) = many0(
             alt((
@@ -111,7 +121,7 @@ impl GetNotificationAttributesRequest {
         Ok((
             i,
             GetNotificationAttributesRequest {
-                command_id: CommandID::try_from(command_id).unwrap(),
+                command_id: command_id,
                 notification_uid: notification_uid,
                 attribute_ids: attribute_ids,
             },
@@ -189,7 +199,7 @@ impl GetAppAttributesRequest {
     /// assert_eq!(notification.attribute_ids, vec![AppAttributeID::DisplayName]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesRequest> {
-        let (i, command_id) = le_u8(i)?;
+        let (i, command_id) = CommandID::parse(i)?;
         let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
         let (i, attribute_ids) = many0(
             AppAttributeID::parse
@@ -200,7 +210,7 @@ impl GetAppAttributesRequest {
         Ok((
             i,
             GetAppAttributesRequest {
-                command_id: CommandID::try_from(command_id).unwrap(),
+                command_id: command_id,
                 app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(),
                 attribute_ids: attribute_ids,
             },

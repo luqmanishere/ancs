@@ -36,9 +36,9 @@ impl TryFrom<u8> for AppAttributeID {
     /// # Examples
     /// ```
     /// # use ancs::attributes::app::AppAttributeID;
-    /// let attribute: AppAttributeID = AppAttributeID::try_from(0).unwrap();
+    /// let app_attribute_id: AppAttributeID = AppAttributeID::try_from(0).unwrap();
     /// 
-    /// assert_eq!(AppAttributeID::DisplayName, attribute);
+    /// assert_eq!(AppAttributeID::DisplayName, app_attribute_id);
     /// ```
     /// 
     fn try_from(original: u8) -> Result<Self, Self::Error> {
@@ -56,14 +56,14 @@ impl AppAttributeID {
     /// ```
     /// # use ancs::attributes::app::AppAttributeID;
     /// let data: [u8; 2] = [0, 1];
-    /// let (data, attribute) = AppAttributeID::parse(&data).unwrap();
+    /// let (data, app_attribute_id) = AppAttributeID::parse(&data).unwrap();
     /// 
-    /// assert_eq!(AppAttributeID::DisplayName, attribute);
+    /// assert_eq!(AppAttributeID::DisplayName, app_attribute_id);
     /// ```
     /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], AppAttributeID> {
-        let (i, attribute_id) = le_u8(i)?;
+        let (i, app_attribute_id) = le_u8(i)?;
 
-        Ok((i, AppAttributeID::try_from(attribute_id).unwrap()))
+        Ok((i, AppAttributeID::try_from(app_attribute_id).unwrap()))
     }
 }

@@ -1,3 +1,8 @@
+use nom::{
+    number::complete::{le_u8},
+    IResult,
+};
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum CommandID {
     GetNotificationAttributes = 0,
@@ -42,5 +47,24 @@ impl TryFrom<u8> for CommandID {
             2 => Ok(CommandID::PerformNotificationAction),
             _ => Err(()),
         }
+    }
+}
+
+impl CommandID {
+    /// Attempts to parse a `CommandID` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// let data: [u8; 2] = [0, 1];
+    /// let (data, command_id) = CommandID::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(CommandID::GetNotificationAttributes, command_id);
+    /// ```
+    /// 
+    pub fn parse(i: &[u8]) -> IResult<&[u8], CommandID> {
+        let (i, command_id) = le_u8(i)?;
+
+        Ok((i, CommandID::try_from(command_id).unwrap()))
     }
 }

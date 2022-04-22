@@ -1,3 +1,8 @@
+use nom::{
+    number::complete::{le_u8},
+    IResult,
+};
+
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EventID {
     NotificationAdded = 0,
@@ -42,6 +47,25 @@ impl TryFrom<u8> for EventID {
             2 => Ok(EventID::NotificationRemoved),
             _ => Err(()),
         }
+    }
+}
+
+impl EventID {
+    /// Attempts to parse a `EventID` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventID;
+    /// let data: [u8; 2] = [0, 1];
+    /// let (data, event_id) = EventID::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(EventID::NotificationAdded, event_id);
+    /// ```
+    /// 
+    pub fn parse(i: &[u8]) -> IResult<&[u8], EventID> {
+        let (i, event_id) = le_u8(i)?;
+
+        Ok((i, EventID::try_from(event_id).unwrap()))
     }
 }
 
@@ -96,5 +120,24 @@ impl TryFrom<u8> for EventFlag {
             4 => Ok(EventFlag::NegativeAction),
             _ => Err(()),
         }
+    }
+}
+
+impl EventFlag {
+    /// Attempts to parse a `EventFlag` from a `&[u8]`
+    /// 
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::event::EventFlag;
+    /// let data: [u8; 2] = [0b00000001, 0b00000010];
+    /// let (data, event_flag) = EventFlag::parse(&data).unwrap();
+    /// 
+    /// assert_eq!(EventFlag::Silent, event_flag);
+    /// ```
+    /// 
+    pub fn parse(i: &[u8]) -> IResult<&[u8], EventFlag> {
+        let (i, event_flag) = le_u8(i)?;
+
+        Ok((i, EventFlag::try_from(event_flag).unwrap()))
     }
 }
