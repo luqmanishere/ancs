@@ -1,6 +1,6 @@
 use nom::{
     number::complete::{le_u8},
-    IResult,
+    IResult, error::ParseError,
 };
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -50,7 +50,7 @@ impl From<CategoryID> for u8 {
 }
 
 impl TryFrom<u8> for CategoryID {
-    type Error = ();
+    type Error = CategoryIDError;
 
     /// Attempts to convert a u8 to a valid `CategoryID`
     /// 
@@ -77,7 +77,7 @@ impl TryFrom<u8> for CategoryID {
             9 => Ok(CategoryID::BusinessAndFinance),
             10 => Ok(CategoryID::Location),
             11 => Ok(CategoryID::Entertainment),
-            _ => Err(()),
+            _ => Err(CategoryIDError),
         }
     }
 }
@@ -97,7 +97,12 @@ impl CategoryID {
     pub fn parse(i: &[u8]) -> IResult<&[u8], CategoryID> {
         let (i, category_id) = le_u8(i)?;
 
-        Ok((i, CategoryID::try_from(category_id).unwrap()))
+        match CategoryID::try_from(category_id) {
+            Ok(category_id) => { Ok((i, category_id)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        }
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct CategoryIDError;

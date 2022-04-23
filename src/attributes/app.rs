@@ -1,6 +1,6 @@
 use nom::{
     number::complete::{le_u8},
-    error::{ErrorKind, ParseError},
+    error::{ParseError},
     IResult,
 };
 
