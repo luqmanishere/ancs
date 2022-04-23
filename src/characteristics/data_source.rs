@@ -244,8 +244,6 @@ impl GetAppAttributesResponse {
     /// ]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
-        println!("{:?}", i);
-
         let (i, command_id) = CommandID::parse(i)?;
         let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
         let (i, attribute_list) = all_consuming(many0(AppAttribute::parse))(i)?;
