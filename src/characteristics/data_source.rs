@@ -2,6 +2,7 @@ use crate::attributes::AppAttribute;
 use crate::attributes::NotificationAttribute;
 use crate::attributes::command::*;
 
+use nom::combinator::all_consuming;
 use nom::{
     bytes::complete::take_till,
     multi::{many0},
@@ -92,7 +93,7 @@ impl GetNotificationAttributesResponse {
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetNotificationAttributesResponse> {
         let (i, command_id) = CommandID::parse(i)?;
         let (i, notification_uid) = le_u32(i)?;
-        let (i, attribute_list) = many0(NotificationAttribute::parse)(i)?;
+        let (i, attribute_list) = all_consuming(many0(NotificationAttribute::parse))(i)?;
 
         Ok((
             i,
@@ -243,9 +244,11 @@ impl GetAppAttributesResponse {
     /// ]);
     /// ```
     pub fn parse(i: &[u8]) -> IResult<&[u8], GetAppAttributesResponse> {
+        println!("{:?}", i);
+
         let (i, command_id) = CommandID::parse(i)?;
         let (i, app_identifier) = terminated(take_till(|b| b == 0), le_u8)(i)?;
-        let (i, attribute_list) = many0(AppAttribute::parse)(i)?;
+        let (i, attribute_list) = all_consuming(many0(AppAttribute::parse))(i)?;
 
         Ok((
             i,

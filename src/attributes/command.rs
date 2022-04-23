@@ -66,7 +66,7 @@ impl CommandID {
 
         match CommandID::try_from(command_id) {
             Ok(command_id) => { Ok((i, command_id)) },
-            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+            Err(_) => { Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))) },
         }
     }
 }
