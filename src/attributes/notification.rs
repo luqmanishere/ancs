@@ -1,6 +1,6 @@
 use nom::{
     number::complete::{le_u8},
-    IResult,
+    IResult, error::ParseError,
 };
 
 /// Provides a set of identifiers for types of attributes that a consumer may require.
@@ -42,7 +42,7 @@ impl From<NotificationAttributeID> for u8 {
 }
 
 impl TryFrom<u8> for NotificationAttributeID {
-    type Error = ();
+    type Error = NotificationAttributeIDError;
 
     /// Attempts to convert a `u8` to a `NotificationAttributeID`
     /// 
@@ -64,7 +64,7 @@ impl TryFrom<u8> for NotificationAttributeID {
             5 => Ok(NotificationAttributeID::Date),
             6 => Ok(NotificationAttributeID::PositiveActionLabel),
             7 => Ok(NotificationAttributeID::NegativeActionLabel),
-            _ => Err(()),
+            _ => Err(NotificationAttributeIDError),
         }
     }
 }
@@ -84,7 +84,10 @@ impl NotificationAttributeID {
     pub fn parse(i: &[u8]) -> IResult<&[u8], NotificationAttributeID> {
         let (i, notification_attribute_id) = le_u8(i)?;
 
-        Ok((i, NotificationAttributeID::try_from(notification_attribute_id).unwrap()))
+        match NotificationAttributeID::try_from(notification_attribute_id) {
+            Ok(notification_attribute_id) => { Ok((i, notification_attribute_id)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        }
     }
 
     /// Determines if a `NotificationAttributeID` has a size based
@@ -109,3 +112,6 @@ impl NotificationAttributeID {
         }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct NotificationAttributeIDError;

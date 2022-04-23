@@ -1,6 +1,6 @@
 use nom::{
     number::complete::{le_u8},
-    IResult,
+    IResult, error::ParseError,
 };
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -30,7 +30,7 @@ impl From<EventID> for u8 {
 }
 
 impl TryFrom<u8> for EventID {
-    type Error = ();
+    type Error = EventIDError;
     /// Attempts to convert a `u8` to a `EventID`
     /// 
     /// # Examples
@@ -45,7 +45,7 @@ impl TryFrom<u8> for EventID {
             0 => Ok(EventID::NotificationAdded),
             1 => Ok(EventID::NotificationModified),
             2 => Ok(EventID::NotificationRemoved),
-            _ => Err(()),
+            _ => Err(EventIDError),
         }
     }
 }
@@ -65,9 +65,15 @@ impl EventID {
     pub fn parse(i: &[u8]) -> IResult<&[u8], EventID> {
         let (i, event_id) = le_u8(i)?;
 
-        Ok((i, EventID::try_from(event_id).unwrap()))
+        match EventID::try_from(event_id) {
+            Ok(event_id) => { Ok((i, event_id)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct EventIDError;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum EventFlag {
@@ -100,7 +106,7 @@ impl From<EventFlag> for u8 {
 }
 
 impl TryFrom<u8> for EventFlag {
-    type Error = ();
+    type Error = EventFlagError;
 
     /// Attempts to convert a `u8` to a `EventFlag`
     /// 
@@ -118,7 +124,7 @@ impl TryFrom<u8> for EventFlag {
             2 => Ok(EventFlag::PreExisting),
             3 => Ok(EventFlag::PositiveAction),
             4 => Ok(EventFlag::NegativeAction),
-            _ => Err(()),
+            _ => Err(EventFlagError),
         }
     }
 }
@@ -138,6 +144,12 @@ impl EventFlag {
     pub fn parse(i: &[u8]) -> IResult<&[u8], EventFlag> {
         let (i, event_flag) = le_u8(i)?;
 
-        Ok((i, EventFlag::try_from(event_flag).unwrap()))
+        match EventFlag::try_from(event_flag) {
+            Ok(event_flag) => { Ok((i, event_flag)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct EventFlagError;

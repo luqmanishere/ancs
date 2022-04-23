@@ -1,6 +1,6 @@
 use nom::{
     number::complete::{le_u8},
-    IResult,
+    IResult, error::ParseError,
 };
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -30,7 +30,7 @@ impl From<CommandID> for u8 {
 }
 
 impl TryFrom<u8> for CommandID {
-    type Error = ();
+    type Error = CommandIDError;
     /// Attempts to convert a `u8` to a valid `CommandID`
     /// 
     /// # Examples
@@ -45,7 +45,7 @@ impl TryFrom<u8> for CommandID {
             0 => Ok(CommandID::GetNotificationAttributes),
             1 => Ok(CommandID::GetAppAttributes),
             2 => Ok(CommandID::PerformNotificationAction),
-            _ => Err(()),
+            _ => Err(CommandIDError),
         }
     }
 }
@@ -61,10 +61,15 @@ impl CommandID {
     /// 
     /// assert_eq!(CommandID::GetNotificationAttributes, command_id);
     /// ```
-    /// 
     pub fn parse(i: &[u8]) -> IResult<&[u8], CommandID> {
         let (i, command_id) = le_u8(i)?;
 
-        Ok((i, CommandID::try_from(command_id).unwrap()))
+        match CommandID::try_from(command_id) {
+            Ok(command_id) => { Ok((i, command_id)) },
+            Err(_) => Err(nom::Err::Failure(ParseError::from_error_kind(i, nom::error::ErrorKind::Fail))),
+        }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct CommandIDError;
