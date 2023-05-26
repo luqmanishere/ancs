@@ -10,8 +10,9 @@ use nom::{
     sequence::{terminated},
     IResult,
 };
+use uuid::{uuid, Uuid};
 
-pub const DATA_SOURCE_UUID: &str = "22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB";
+pub const DATA_SOURCE_UUID: Uuid = uuid!("22EAC6E9-24D6-4BB5-BE44-B36ACE7C7BFB");
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct GetNotificationAttributesResponse {

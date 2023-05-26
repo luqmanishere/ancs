@@ -2,8 +2,9 @@ use crate::attributes::category::*;
 use crate::attributes::event::*;
 
 use nom::{multi::count, number::complete::le_u8, IResult};
+use uuid::{uuid, Uuid};
 
-pub const NOTIFICATION_SOURCE_UUID: &str = "9FBF120D-6301-42D9-8C58-25E699A21DBD";
+pub const NOTIFICATION_SOURCE_UUID: Uuid = uuid!("9FBF120D-6301-42D9-8C58-25E699A21DBD");
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Notification {

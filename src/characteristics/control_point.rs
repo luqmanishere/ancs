@@ -14,8 +14,9 @@ use nom::{
     sequence::{pair, terminated},
     IResult,
 };
+use uuid::{uuid, Uuid};
 
-pub const CONTROL_POINT_UUID: &str = "69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9";
+pub const CONTROL_POINT_UUID: Uuid = uuid!("69D1D8F3-45E1-49A8-9821-9BBDFDAAD9D9");
 
 pub struct GetNotificationAttributesRequest {
     pub command_id: CommandID,
