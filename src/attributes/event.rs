@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use nom::{
     number::complete::{le_u8},
     IResult, error::ParseError,
@@ -75,13 +76,15 @@ impl EventID {
 #[derive(Debug, Clone)]
 pub struct EventIDError;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum EventFlag {
-    Silent = 0b00000001,
-    Important = 0b00000010,
-    PreExisting = 0b00000100,
-    PositiveAction = 0b00001000,
-    NegativeAction = 0b00010000,
+bitflags! {
+    #[derive(Debug, PartialEq, Clone, Copy)]
+    pub struct EventFlag: u8 {
+        const Silent = 0b00000001;
+        const Important = 0b00000010;
+        const PreExisting = 0b00000100;
+        const PositiveAction = 0b00001000;
+        const NegativeAction = 0b00010000;
+    }
 }
 
 impl From<EventFlag> for u8 {
@@ -95,13 +98,7 @@ impl From<EventFlag> for u8 {
     /// assert_eq!(0b00000001, data);
     /// ```
     fn from(original: EventFlag) -> u8 {
-        match original {
-            EventFlag::Silent => 0b00000001,
-            EventFlag::Important => 0b00000010,
-            EventFlag::PreExisting => 0b00000100,
-            EventFlag::PositiveAction => 0b00001000,
-            EventFlag::NegativeAction => 0b00010000,
-        }
+        original.bits()
     }
 }
 
@@ -118,14 +115,7 @@ impl TryFrom<u8> for EventFlag {
     /// assert_eq!(EventFlag::Silent, event_flag);
     /// ```
     fn try_from(original: u8) -> Result<Self, Self::Error> {
-        match original.trailing_zeros() {
-            0 => Ok(EventFlag::Silent),
-            1 => Ok(EventFlag::Important),
-            2 => Ok(EventFlag::PreExisting),
-            3 => Ok(EventFlag::PositiveAction),
-            4 => Ok(EventFlag::NegativeAction),
-            _ => Err(EventFlagError),
-        }
+        EventFlag::from_bits(original).ok_or(EventFlagError)
     }
 }
 

@@ -16,4 +16,5 @@ categories = ["encoding", "network-programming"]
 path = "src/lib.rs"
 
 [dependencies]
+bitflags = "2.3.1"
 nom = "7.1.1"

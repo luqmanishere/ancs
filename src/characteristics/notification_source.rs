@@ -89,7 +89,7 @@ impl From<Notification> for [u8; 8] {
         let uid_as_u8 = original.notification_uid.to_le_bytes();
 
         bytes[0] = original.event_id as u8;
-        bytes[1] = original.event_flags as u8;
+        bytes[1] = u8::from(original.event_flags);
         bytes[2] = original.category_id as u8;
         bytes[3] = original.category_count as u8;
 
