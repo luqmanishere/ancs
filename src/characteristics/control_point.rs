@@ -1,3 +1,4 @@
+use crate::attributes::action::ActionID;
 use crate::attributes::app::AppAttributeID;
 use crate::attributes::notification::NotificationAttributeID;
 use crate::attributes::command::*;
@@ -115,8 +116,6 @@ impl GetNotificationAttributesRequest {
             ))
         )(i)?; 
 
-        println!("{:?}", attribute_ids);
-
         Ok((
             i,
             GetNotificationAttributesRequest {
@@ -204,14 +203,91 @@ impl GetAppAttributesRequest {
             AppAttributeID::parse
         )(i)?; 
 
-        println!("{:?}", attribute_ids);
-
         Ok((
             i,
             GetAppAttributesRequest {
                 command_id: command_id,
                 app_identifier: String::from_utf8(app_identifier.to_vec()).unwrap(),
                 attribute_ids: attribute_ids,
+            },
+        ))
+    }
+}
+
+pub struct PerformNotificationActionRequest {
+    pub command_id: CommandID,
+    pub notification_uid: u32,
+    pub action_id: ActionID,
+}
+
+impl From<PerformNotificationActionRequest> for Vec<u8> {
+    /// Converts a `PerformNotificationActionRequest` to a `Vec<u8>`
+    ///
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::action::ActionID;
+    /// # use ancs::characteristics::control_point::PerformNotificationActionRequest;
+    /// let notification: PerformNotificationActionRequest = PerformNotificationActionRequest {
+    ///     command_id: CommandID::PerformNotificationAction,
+    ///     notification_uid: 4294967295_u32,
+    ///     action_id: ActionID::Positive,
+    /// };
+    ///
+    /// let data: Vec<u8> = notification.into();
+    /// let expected_data: Vec<u8> = vec![2, 255, 255, 255, 255, 0];
+    ///
+    /// assert_eq!(data, expected_data)
+    /// ```
+    fn from(original: PerformNotificationActionRequest) -> Vec<u8> {
+        let mut vec: Vec<u8> = Vec::new();
+
+        // Convert all attributes to bytes
+        let command_id: u8 = original.command_id.into();
+        let notification_uid: [u8; 4] = original.notification_uid.to_le_bytes();
+        let action_id: u8 = original.action_id.into();
+
+        vec.push(command_id);
+        vec.extend(notification_uid);
+        vec.push(action_id);
+
+        return vec;
+    }
+}
+
+impl PerformNotificationActionRequest {
+    /// Attempts to parse a `PerformNotificationActionRequest` from a `&[u8]`
+    ///
+    /// # Examples
+    /// ```
+    /// # use ancs::attributes::command::CommandID;
+    /// # use ancs::attributes::action::ActionID;
+    /// # use ancs::characteristics::control_point::PerformNotificationActionRequest;
+    /// let data: Vec<u8> = vec![
+    ///     2,
+    ///     255,
+    ///     255,
+    ///     255,
+    ///     255,
+    ///     0,
+    /// ];
+    /// let (data, notification) = PerformNotificationActionRequest::parse(&data).unwrap();
+    ///
+    /// assert_eq!(notification.command_id, CommandID::PerformNotificationAction);
+    /// assert_eq!(notification.notification_uid, 4294967295_u32);
+    /// assert_eq!(notification.action_id, ActionID::Positive);
+    /// ```
+    pub fn parse(i: &[u8]) -> IResult<&[u8], PerformNotificationActionRequest> {
+        let (i, command_id) = CommandID::parse(i)?;
+        let (i, notification_uid) = le_u32(i)?;
+        let (i, action_id) = ActionID::parse(i)?;
+
+        Ok((
+            i,
+            PerformNotificationActionRequest {
+                command_id: command_id,
+                notification_uid: notification_uid,
+                action_id: action_id,
             },
         ))
     }

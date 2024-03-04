@@ -4,6 +4,7 @@
 //! there are a wide variety of Attributes that can be used. Please see the attributes module
 //! provided by this library for which attributes are valid when working with ANCS.
 //! 
+pub mod action;
 pub mod app;
 pub mod category;
 pub mod command;
