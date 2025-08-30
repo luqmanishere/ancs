@@ -11,6 +11,19 @@ An Apple Notification Control Service protocol library for Rust, with minimal de
 
 > The purpose of the Apple Notification Center Service (ANCS) is to give Bluetooth accessories (that connect to iOS devices through a Bluetooth low-energy link) a simple and convenient way to access many kinds of notifications that are generated on iOS devices.
 
+## Why the fork?
+
+The original project seems to be inactive, and I'd like some of the patches from [impiaa's fork](https://github.com/impiaaa/ancs).
+
+### Merged improvements
+
+- Notification event flags now use bitfields as they described in the spec.
+- UUID constants are now using the `Uuid` type from the `uuid` crate.
+
+### Other changes
+
+- Use major version for dependencies wherever possible.
+
 ## What is This Library
 
 This library contains all the required types and functions to work with the Bluetooth Low Energy Apple Notification Control Service Protocol. This is a low-level library, meant to be a building block for
